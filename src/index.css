@@ -1,21 +1,26 @@
 :root {
-  font-family: 'Pretendard Variable', Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+  font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo',
+    'Noto Sans KR', 'Segoe UI', sans-serif;
   font-size: 17px;
-  color: #4f4944;
-  background: #fbfaf7;
+  color: #243029;
+  background: #f1eee6;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --ink: #211c18;
-  --muted: #817870;
-  --primary: #ed6b32;
-  --primary-dark: #bc4d20;
-  --primary-soft: #fff0e6;
-  --success: #39935c;
-  --surface: #f8f5ef;
-  --line: #e9e4dc;
-  --radius-lg: 22px;
-  --shadow-soft: 0 10px 35px rgba(54, 38, 27, 0.055);
+  --ink: #18221c;
+  --muted: #69716c;
+  --primary: #176248;
+  --primary-dark: #0d4432;
+  --primary-soft: #dce9e1;
+  --accent: #f0cb4e;
+  --accent-soft: #fff2b8;
+  --success: #176248;
+  --danger: #bc4935;
+  --surface: #faf8f2;
+  --surface-strong: #fffdf8;
+  --line: #d2d1c8;
+  --line-strong: #9ca39d;
+  --radius-lg: 6px;
 }
 
 * {
@@ -31,7 +36,10 @@ body {
   min-width: 320px;
   min-height: 100vh;
   line-height: 1.55;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.018em;
+  background-color: #f1eee6;
+  background-image: linear-gradient(rgba(24, 34, 28, 0.025) 1px, transparent 1px);
+  background-size: 100% 32px;
 }
 
 button,
@@ -41,6 +49,11 @@ a {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid rgba(237, 107, 50, 0.35);
+  outline: 3px solid rgba(23, 98, 72, 0.3);
   outline-offset: 3px;
+}
+
+::selection {
+  color: var(--ink);
+  background: var(--accent);
 }

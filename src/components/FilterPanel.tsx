@@ -53,7 +53,7 @@ export function FilterPanel({
     <section className="filter-panel">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">STEP 2</p>
+          <p className="eyebrow">02 · 조건</p>
           <h2>오늘의 조건</h2>
         </div>
         {hasSelections ? (

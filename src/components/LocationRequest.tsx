@@ -21,10 +21,10 @@ export function LocationRequest({ status, onRequest }: LocationRequestProps) {
   return (
     <section className={`location-card ${hasLocation ? 'is-ready' : ''}`}>
       <div className="location-icon" aria-hidden="true">
-        {hasLocation ? '✓' : '⌖'}
+        {hasLocation ? '✓' : '01'}
       </div>
       <div className="location-copy">
-        <p className="eyebrow">STEP 1</p>
+        <p className="eyebrow">01 · 위치</p>
         <h2>
           {hasLocation
             ? '현재 위치를 확인했어요'

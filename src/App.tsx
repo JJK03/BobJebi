@@ -137,33 +137,40 @@ function App() {
     <div className="app-shell">
       <header className="site-header">
         <a className="brand" href="#top" aria-label="오늘 뭐 먹지 홈">
-          <span className="brand-mark">냠</span>
-          <span>오늘 뭐 먹지?</span>
+          <span className="brand-mark" aria-hidden="true">한끼</span>
+          <span className="brand-name">오늘 뭐 먹지?</span>
         </a>
-        <p>내 위치와 예산에 맞는 착한가격 식당 제비뽑기</p>
+        <p><span aria-hidden="true" />전국 착한가격업소에서 골라요</p>
       </header>
 
       <main id="top">
         <section className="hero-section">
           <div className="hero-copy">
-            <p className="hero-kicker">전국 9,407개 착한가격업소</p>
+            <p className="hero-kicker">가까운 곳에서 · 예산 안에서</p>
             <h1>
-              결정은 제비뽑기에게,
-              <br />맛있는 한 끼는 나에게.
+              오늘 밥은
+              <br />뽑아서 정해요.
             </h1>
             <p>
-              현재 위치, 먹고 싶은 종류, 예산만 고르면
-              <br className="desktop-break" /> 가까운 식당을 공정하게 골라드려요.
+              위치와 조건을 고르면 가까운 착한가격 식당 중
+              <br className="desktop-break" /> 한 곳을 가볍게 뽑아드려요.
             </p>
           </div>
-          <div className="hero-visual" aria-hidden="true">
-            <div className="plate">
-              <span className="food food-one">🍚</span>
-              <span className="food food-two">🥟</span>
-              <span className="food food-three">🍜</span>
-              <span className="food food-four">🍛</span>
+          <div className="hero-ticket" aria-hidden="true">
+            <div className="hero-ticket-head">
+              <span>LOCAL MEAL LOT</span>
+              <span>GOOD PRICE</span>
             </div>
-            <span className="price-tag">만원으로 뭐 먹지?</span>
+            <div className="hero-ticket-number">
+              <strong>9,407</strong>
+              <span>등록 식당</span>
+            </div>
+            <div className="hero-ticket-lines">
+              <span>위치</span><i />
+              <span>예산</span><i />
+              <span>메뉴</span><i />
+            </div>
+            <p>조건에 맞는 후보만 넣고 한 곳을 뽑습니다.</p>
           </div>
         </section>
 

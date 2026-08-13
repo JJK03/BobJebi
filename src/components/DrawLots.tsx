@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 
 const MAX_VISIBLE_LOTS = 11
-const LOT_COLORS = ['#ffc5ae', '#ffd083', '#ffe29c', '#ffbaa2']
+const LOT_COLORS = ['#f0c94d', '#d9e6d8', '#e8704f', '#eee7d8']
 
 interface DrawLotsProps {
   candidateCount: number
@@ -29,8 +29,8 @@ export function DrawLots({
     <section className="draw-panel">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">STEP 3</p>
-          <h2>오늘의 제비뽑기</h2>
+          <p className="eyebrow">03 · 추첨</p>
+          <h2>후보에서 한 곳 뽑기</h2>
         </div>
         <span className="candidate-count">
           후보 {candidateCount.toLocaleString()}곳
@@ -74,7 +74,7 @@ export function DrawLots({
             </>
           ) : winnerName ? (
             <>
-              <span className="ticket-label">오늘의 당첨 제비</span>
+              <span className="ticket-label">오늘 뽑힌 식당</span>
               <strong>{winnerName}</strong>
             </>
           ) : (
@@ -102,7 +102,7 @@ export function DrawLots({
         onClick={onDraw}
         disabled={disabled || isDrawing}
       >
-        {isDrawing ? '제비를 뽑는 중…' : winnerName ? '다시 뽑기' : '제비 뽑기'}
+        {isDrawing ? '제비를 뽑는 중…' : winnerName ? '다시 뽑기' : '한 곳 뽑기'}
       </button>
       {disabled && (
         <p className="draw-help">

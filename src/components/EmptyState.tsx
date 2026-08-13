@@ -22,7 +22,7 @@ export function EmptyState({
 
   return (
     <section className="empty-state" role="status">
-      <span aria-hidden="true">🍽️</span>
+      <span aria-hidden="true">0</span>
       <div>
         <h2>선택한 조건에 해당하는 식당이 없어요</h2>
         <p>

@@ -36,10 +36,10 @@ export function RecommendationCard({
 
   return (
     <section className="result-card" aria-labelledby="result-title">
-      <div className="result-badge">오늘의 선택</div>
+      <div className="result-badge">오늘의 한 끼</div>
       <div className="result-title-row">
         <div>
-          <p className="eyebrow">🎯 추천 결과</p>
+          <p className="eyebrow">뽑기 결과</p>
           <h2 id="result-title">{restaurant.name}</h2>
           <p className="result-summary">
             {restaurant.category} · 직선거리 {formatDistance(distanceMeters)} · 예상 {travelLabel}{' '}
