@@ -1,4 +1,5 @@
-import type { CategoryFilter } from '../domain/restaurant'
+import { isUnlimitedBudget } from '../domain/filterOptions'
+import { ALL_CATEGORY_FILTER, type CategoryFilter } from '../domain/restaurant'
 
 export function getCandidateDescription(
   category: CategoryFilter | null,
@@ -8,8 +9,8 @@ export function getCandidateDescription(
     return '조건을 모두 선택해 주세요'
   }
 
-  const hasCategoryLimit = category !== '전체'
-  const hasBudgetLimit = Number.isFinite(budget)
+  const hasCategoryLimit = category !== ALL_CATEGORY_FILTER
+  const hasBudgetLimit = !isUnlimitedBudget(budget)
 
   if (!hasCategoryLimit && !hasBudgetLimit) {
     return '모든 후보가 참여해요'

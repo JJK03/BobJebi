@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { UNLIMITED_BUDGET } from '../domain/filterOptions'
 import {
   createEmptyFilterPreferences,
   parseFilterPreferences,
@@ -23,7 +24,7 @@ describe('filterPreferences', () => {
     const preferences = {
       ...createEmptyFilterPreferences(),
       category: '전체' as const,
-      budget: Number.POSITIVE_INFINITY,
+      budget: UNLIMITED_BUDGET,
     }
 
     expect(parseFilterPreferences(serializeFilterPreferences(preferences))).toEqual(

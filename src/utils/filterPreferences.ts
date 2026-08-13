@@ -1,7 +1,12 @@
 import {
-  RESTAURANT_CATEGORIES,
-  type CategoryFilter,
-} from '../domain/restaurant'
+  BUDGET_OPTIONS,
+  CATEGORY_FILTER_OPTIONS,
+  TRAVEL_MODE_OPTIONS,
+  TRAVEL_TIME_LIMIT_OPTIONS,
+  UNLIMITED_BUDGET,
+  isUnlimitedBudget,
+} from '../domain/filterOptions'
+import type { CategoryFilter } from '../domain/restaurant'
 import type { TravelMode, TravelTimeLimit } from '../domain/travel'
 
 export interface FilterPreferences {
@@ -11,10 +16,14 @@ export interface FilterPreferences {
   travelTimeLimit: TravelTimeLimit | null
 }
 
-const categories = new Set<string>(['전체', ...RESTAURANT_CATEGORIES])
-const budgets = new Set([10_000, 15_000, 20_000])
-const travelModes = new Set<TravelMode>(['walking', 'driving'])
-const travelTimeLimits = new Set<TravelTimeLimit>([10, 20, 'wide'])
+const categories = new Set<string>(CATEGORY_FILTER_OPTIONS)
+const budgets = new Set<number>(BUDGET_OPTIONS.map(({ value }) => value))
+const travelModes = new Set<TravelMode>(
+  TRAVEL_MODE_OPTIONS.map(({ value }) => value),
+)
+const travelTimeLimits = new Set<TravelTimeLimit>(
+  TRAVEL_TIME_LIMIT_OPTIONS.map(({ value }) => value),
+)
 
 export function createEmptyFilterPreferences(): FilterPreferences {
   return {
@@ -31,7 +40,7 @@ export function serializeFilterPreferences(
   return JSON.stringify({
     ...preferences,
     budget:
-      preferences.budget === Number.POSITIVE_INFINITY
+      preferences.budget !== null && isUnlimitedBudget(preferences.budget)
         ? 'unlimited'
         : preferences.budget,
   })
@@ -57,7 +66,7 @@ export function parseFilterPreferences(
         : null
     const budget =
       stored.budget === 'unlimited'
-        ? Number.POSITIVE_INFINITY
+        ? UNLIMITED_BUDGET
         : typeof stored.budget === 'number' && budgets.has(stored.budget)
           ? stored.budget
           : null

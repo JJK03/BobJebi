@@ -6,8 +6,17 @@ import { FilterPanel } from './components/FilterPanel'
 import { LocationRequest } from './components/LocationRequest'
 import { RecommendationCard } from './components/RecommendationCard'
 import { filterRestaurants, type RestaurantCandidate } from './domain/filters'
+import {
+  UNLIMITED_BUDGET,
+  getTravelRangeSummary,
+  getWideTravelRangeLabel,
+  isUnlimitedBudget,
+} from './domain/filterOptions'
 import { pickRandomItem } from './domain/random'
-import type { CategoryFilter } from './domain/restaurant'
+import {
+  ALL_CATEGORY_FILTER,
+  type CategoryFilter,
+} from './domain/restaurant'
 import {
   getTravelDistanceLimitMeters,
   type TravelMode,
@@ -183,7 +192,11 @@ function App() {
               <span>GOOD PRICE</span>
             </div>
             <div className="hero-ticket-number">
-              <strong>9,407</strong>
+              <strong>
+                {dataStatus === 'success'
+                  ? restaurants.length.toLocaleString('ko-KR')
+                  : '—'}
+              </strong>
               <span>등록 식당</span>
             </div>
             <div className="hero-ticket-lines">
@@ -239,18 +252,18 @@ function App() {
 
         {isReady && candidates.length === 0 && (
           <EmptyState
-            canResetCategory={category !== '전체'}
-            canRemoveBudgetLimit={Number.isFinite(budget)}
+            canResetCategory={category !== ALL_CATEGORY_FILTER}
+            canRemoveBudgetLimit={
+              budget !== null && !isUnlimitedBudget(budget)
+            }
             canExpandTravelRange={travelTimeLimit !== 'wide'}
             travelRangeLabel={
-              travelMode === 'driving'
-                ? '최대 20km로 넓히기'
-                : '최대 2km로 넓히기'
+              travelMode
+                ? `${getWideTravelRangeLabel(travelMode)}로 넓히기`
+                : '검색 범위 넓히기'
             }
-            onResetCategory={() => changeCategory('전체')}
-            onRemoveBudgetLimit={() =>
-              changeBudget(Number.POSITIVE_INFINITY)
-            }
+            onResetCategory={() => changeCategory(ALL_CATEGORY_FILTER)}
+            onRemoveBudgetLimit={() => changeBudget(UNLIMITED_BUDGET)}
             onExpandTravelRange={() => changeTravelTime('wide')}
           />
         )}
@@ -269,7 +282,7 @@ function App() {
 
       <footer>
         행정안전부 착한가격업소 데이터를 활용한 위치 기반 추천 서비스
-        <span>최대 검색 범위: 도보 2km · 자차 20km</span>
+        <span>최대 검색 범위: {getTravelRangeSummary()}</span>
       </footer>
     </div>
   )

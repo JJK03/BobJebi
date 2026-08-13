@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   estimateTravelTimeMinutes,
   getTravelDistanceLimitMeters,
+  getWideTravelDistanceMeters,
 } from './travel'
 
 describe('getTravelDistanceLimitMeters', () => {
@@ -13,6 +14,8 @@ describe('getTravelDistanceLimitMeters', () => {
   it('넓게 보기는 이동 방식별 최대 범위를 적용한다', () => {
     expect(getTravelDistanceLimitMeters('walking', 'wide')).toBe(2_000)
     expect(getTravelDistanceLimitMeters('driving', 'wide')).toBe(20_000)
+    expect(getWideTravelDistanceMeters('walking')).toBe(2_000)
+    expect(getWideTravelDistanceMeters('driving')).toBe(20_000)
   })
 })
 

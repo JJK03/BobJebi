@@ -6,8 +6,10 @@ export const RESTAURANT_CATEGORIES = [
   '기타요식업',
 ] as const
 
+export const ALL_CATEGORY_FILTER = '전체' as const
+
 export type RestaurantCategory = (typeof RESTAURANT_CATEGORIES)[number]
-export type CategoryFilter = '전체' | RestaurantCategory
+export type CategoryFilter = typeof ALL_CATEGORY_FILTER | RestaurantCategory
 
 export interface Coordinates {
   latitude: number

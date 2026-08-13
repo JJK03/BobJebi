@@ -11,12 +11,16 @@ const WIDE_DISTANCE_LIMIT_METERS: Record<TravelMode, number> = {
   driving: 20_000,
 }
 
+export function getWideTravelDistanceMeters(mode: TravelMode): number {
+  return WIDE_DISTANCE_LIMIT_METERS[mode]
+}
+
 export function getTravelDistanceLimitMeters(
   mode: TravelMode,
   timeLimit: TravelTimeLimit,
 ): number {
   if (timeLimit === 'wide') {
-    return WIDE_DISTANCE_LIMIT_METERS[mode]
+    return getWideTravelDistanceMeters(mode)
   }
 
   return METERS_PER_MINUTE[mode] * timeLimit

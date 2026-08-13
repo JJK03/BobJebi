@@ -1,9 +1,10 @@
 import { calculateDistanceMeters } from './distance'
-import type {
-  CategoryFilter,
-  Coordinates,
-  Menu,
-  Restaurant,
+import {
+  ALL_CATEGORY_FILTER,
+  type CategoryFilter,
+  type Coordinates,
+  type Menu,
+  type Restaurant,
 } from './restaurant'
 
 export interface FilterConditions {
@@ -34,7 +35,7 @@ export function filterRestaurants(
 
   for (const restaurant of restaurants) {
     if (
-      conditions.category !== '전체' &&
+      conditions.category !== ALL_CATEGORY_FILTER &&
       restaurant.category !== conditions.category
     ) {
       continue
