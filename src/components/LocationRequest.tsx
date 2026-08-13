@@ -59,7 +59,7 @@ export function LocationRequest({ status, onRequest }: LocationRequestProps) {
             ? '위치 새로고침'
             : status === 'denied'
               ? '위치 권한 다시 확인'
-            : '현재 위치 사용'}
+            : '위치 권한 허용하고 시작하기'}
       </button>
     </section>
   )
