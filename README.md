@@ -1,0 +1,52 @@
+# 오늘 뭐 먹지?
+
+현재 위치, 음식 종류, 예산, 이동 방식과 예상 시간을 바탕으로 주변 착한가격업소 한 곳을 제비뽑기로 추천하는 React 정적 웹 앱입니다.
+
+## 기술 구성
+
+- React + TypeScript + Vite
+- 브라우저 Geolocation API
+- Haversine 직선거리 계산
+- 정적 JSON 데이터 9,407건
+- Vitest 단위 테스트
+- 백엔드와 데이터베이스 없음
+
+카카오 REST API 키는 웹 앱에서 사용하지 않으며 저장소에도 보관하지 않습니다. 주소 좌표 변환이 끝난 정적 데이터만 사용합니다.
+
+## VS Code + CMD에서 실행
+
+```cmd
+cd /d C:\workspace\Menu_recs
+npm install
+npm run dev
+```
+
+브라우저에서 `http://localhost:5173`을 엽니다. 개발 서버를 종료할 때는 CMD에서 `Ctrl+C`를 누릅니다.
+
+## 검증 명령
+
+```cmd
+npm test
+npm run lint
+npm run build
+```
+
+프로덕션 빌드 결과는 `dist` 폴더에 생성됩니다. 로컬에서 빌드 결과를 확인하려면 다음 명령을 실행합니다.
+
+```cmd
+npm run preview
+```
+
+## 주요 구조
+
+```text
+public/data/restaurants.json  앱에서 불러오는 식당 데이터
+src/components/              화면 구성 요소
+src/data/                    정적 데이터 로더
+src/domain/                  거리·필터·추첨 순수 로직과 테스트
+src/hooks/                   데이터 및 현재 위치 상태 관리
+```
+
+## 거리 기준
+
+이동 시간은 실제 경로 탐색 결과가 아니라 두 좌표 사이의 직선거리와 평균 속도(도보 시속 4km, 자차 시속 24km)로 계산한 예상값입니다. 주변 추천의 범위를 벗어나지 않도록 넓게 보기에도 도보 2km, 자차 20km의 최대 검색 범위를 적용합니다. 식당은 선택한 예산 이하 메뉴가 하나 이상 있을 때만 추천 후보에 포함됩니다.

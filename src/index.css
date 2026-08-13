@@ -1,0 +1,46 @@
+:root {
+  font-family: 'Pretendard Variable', Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+  font-size: 17px;
+  color: #4f4944;
+  background: #fbfaf7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --ink: #211c18;
+  --muted: #817870;
+  --primary: #ed6b32;
+  --primary-dark: #bc4d20;
+  --primary-soft: #fff0e6;
+  --success: #39935c;
+  --surface: #f8f5ef;
+  --line: #e9e4dc;
+  --radius-lg: 22px;
+  --shadow-soft: 0 10px 35px rgba(54, 38, 27, 0.055);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  line-height: 1.55;
+  letter-spacing: -0.015em;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(237, 107, 50, 0.35);
+  outline-offset: 3px;
+}
