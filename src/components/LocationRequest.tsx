@@ -16,6 +16,7 @@ interface LocationRequestProps {
 export function LocationRequest({ status, onRequest }: LocationRequestProps) {
   const hasLocation = status === 'success'
   const isRequesting = status === 'requesting'
+  const isChecking = status === 'checking'
 
   return (
     <section className={`location-card ${hasLocation ? 'is-ready' : ''}`}>
@@ -24,11 +25,19 @@ export function LocationRequest({ status, onRequest }: LocationRequestProps) {
       </div>
       <div className="location-copy">
         <p className="eyebrow">STEP 1</p>
-        <h2>{hasLocation ? '현재 위치를 확인했어요' : '내 주변 식당 찾기'}</h2>
+        <h2>
+          {hasLocation
+            ? '현재 위치를 확인했어요'
+            : isChecking
+              ? '위치 권한을 확인하고 있어요'
+              : '내 주변 식당 찾기'}
+        </h2>
         <p>
           {hasLocation
-            ? '선택한 반경 안에서 바로 추천할 수 있습니다.'
-            : '정확한 주변 추천을 위해 현재 위치가 필요합니다.'}
+            ? '브라우저가 허용한 현재 위치를 새로 확인했습니다.'
+            : isChecking
+              ? '브라우저에 저장된 실제 권한 상태를 확인합니다.'
+              : '정확한 주변 추천을 위해 현재 위치가 필요합니다.'}
         </p>
         {statusMessages[status] && (
           <p className="location-error" role="alert">
@@ -40,12 +49,16 @@ export function LocationRequest({ status, onRequest }: LocationRequestProps) {
         className="secondary-button"
         type="button"
         onClick={onRequest}
-        disabled={isRequesting}
+        disabled={isRequesting || isChecking}
       >
-        {isRequesting
+        {isChecking
+          ? '권한 확인 중…'
+          : isRequesting
           ? '위치 확인 중…'
           : hasLocation
             ? '위치 새로고침'
+            : status === 'denied'
+              ? '위치 권한 다시 확인'
             : '현재 위치 사용'}
       </button>
     </section>
