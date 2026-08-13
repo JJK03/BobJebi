@@ -270,6 +270,23 @@ main {
   font-weight: 700;
 }
 
+.filter-reset-button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.filter-reset-button:hover {
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+}
+
 fieldset {
   padding: 0;
   margin: 0 0 24px;

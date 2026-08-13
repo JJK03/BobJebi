@@ -24,6 +24,10 @@ function isRestaurant(value: unknown): value is Restaurant {
     typeof value.address === 'string' &&
     typeof value.latitude === 'number' &&
     typeof value.longitude === 'number' &&
+    (value.kakaoPlaceId === undefined ||
+      typeof value.kakaoPlaceId === 'string') &&
+    (value.kakaoPlaceUrl === undefined ||
+      typeof value.kakaoPlaceUrl === 'string') &&
     value.menus.length > 0 &&
     value.menus.every(
       (menu) =>

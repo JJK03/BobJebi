@@ -14,6 +14,7 @@ import {
   type TravelTimeLimit,
 } from './domain/travel'
 import { useGeolocation } from './hooks/useGeolocation'
+import { useFilterPreferences } from './hooks/useFilterPreferences'
 import { useRestaurants } from './hooks/useRestaurants'
 import { getCandidateDescription } from './utils/candidateDescription'
 
@@ -24,10 +25,9 @@ function App() {
     status: locationStatus,
     requestLocation,
   } = useGeolocation()
-  const [category, setCategory] = useState<CategoryFilter | null>(null)
-  const [budget, setBudget] = useState<number | null>(null)
-  const [travelMode, setTravelMode] = useState<TravelMode | null>(null)
-  const [travelTimeLimit, setTravelTimeLimit] = useState<TravelTimeLimit | null>(null)
+  const { preferences, updatePreference, resetPreferences } =
+    useFilterPreferences()
+  const { category, budget, travelMode, travelTimeLimit } = preferences
   const [selected, setSelected] = useState<RestaurantCandidate>()
   const [isDrawing, setIsDrawing] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
@@ -95,22 +95,27 @@ function App() {
 
   const changeCategory = (value: CategoryFilter) => {
     clearResult()
-    setCategory(value)
+    updatePreference('category', value)
   }
 
   const changeBudget = (value: number) => {
     clearResult()
-    setBudget(value)
+    updatePreference('budget', value)
   }
 
   const changeTravelMode = (value: TravelMode) => {
     clearResult()
-    setTravelMode(value)
+    updatePreference('travelMode', value)
   }
 
   const changeTravelTime = (value: TravelTimeLimit) => {
     clearResult()
-    setTravelTimeLimit(value)
+    updatePreference('travelTimeLimit', value)
+  }
+
+  const resetFilters = () => {
+    clearResult()
+    resetPreferences()
   }
 
   const scrollToFilters = () => {
@@ -181,10 +186,12 @@ function App() {
             budget={budget}
             travelMode={travelMode}
             travelTimeLimit={travelTimeLimit}
+            hasSelections={Object.values(preferences).some((value) => value !== null)}
             onCategoryChange={changeCategory}
             onBudgetChange={changeBudget}
             onTravelModeChange={changeTravelMode}
             onTravelTimeChange={changeTravelTime}
+            onReset={resetFilters}
           />
           <DrawLots
             candidateCount={candidates.length}
@@ -199,8 +206,19 @@ function App() {
 
         {isReady && candidates.length === 0 && (
           <EmptyState
-            onRemoveTimeLimit={() => changeTravelTime('wide')}
-            onRemoveBudgetLimit={() => changeBudget(Number.POSITIVE_INFINITY)}
+            canResetCategory={category !== '전체'}
+            canRemoveBudgetLimit={Number.isFinite(budget)}
+            canExpandTravelRange={travelTimeLimit !== 'wide'}
+            travelRangeLabel={
+              travelMode === 'driving'
+                ? '최대 20km로 넓히기'
+                : '최대 2km로 넓히기'
+            }
+            onResetCategory={() => changeCategory('전체')}
+            onRemoveBudgetLimit={() =>
+              changeBudget(Number.POSITIVE_INFINITY)
+            }
+            onExpandTravelRange={() => changeTravelTime('wide')}
           />
         )}
 

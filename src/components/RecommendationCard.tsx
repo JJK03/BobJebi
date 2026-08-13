@@ -23,7 +23,14 @@ export function RecommendationCard({
   onChangeConditions,
 }: RecommendationCardProps) {
   const { restaurant, affordableMenus, distanceMeters } = candidate
-  const kakaoMapUrl = `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`
+  const kakaoMapUrl =
+    restaurant.kakaoPlaceUrl ??
+    (restaurant.kakaoPlaceId
+      ? `https://map.kakao.com/link/map/${restaurant.kakaoPlaceId}`
+      : `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`)
+  const hasKakaoPlace = Boolean(
+    restaurant.kakaoPlaceUrl || restaurant.kakaoPlaceId,
+  )
   const travelMinutes = estimateTravelTimeMinutes(distanceMeters, travelMode)
   const travelLabel = travelMode === 'walking' ? '도보' : '자차'
 
@@ -76,7 +83,9 @@ export function RecommendationCard({
           target="_blank"
           rel="noreferrer"
         >
-          카카오맵에서 식당명 검색 ↗
+          {hasKakaoPlace
+            ? '카카오맵에서 식당 보기 ↗'
+            : '카카오맵에서 식당명 검색 ↗'}
         </a>
         <button className="secondary-button" type="button" onClick={onRetry}>
           같은 조건으로 다시

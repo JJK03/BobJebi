@@ -13,15 +13,25 @@ if (!Array.isArray(restaurants)) {
 
 let removedGeocodingCount = 0
 const optimizedRestaurants = restaurants.map((restaurant) => {
+  const normalizedRestaurant =
+    typeof restaurant === 'object' &&
+    restaurant !== null &&
+    typeof restaurant.kakaoPlaceUrl === 'string'
+      ? {
+          ...restaurant,
+          kakaoPlaceUrl: restaurant.kakaoPlaceUrl.replace(/^http:/, 'https:'),
+        }
+      : restaurant
+
   if (
-    typeof restaurant !== 'object' ||
-    restaurant === null ||
-    !('geocoding' in restaurant)
+    typeof normalizedRestaurant !== 'object' ||
+    normalizedRestaurant === null ||
+    !('geocoding' in normalizedRestaurant)
   ) {
-    return restaurant
+    return normalizedRestaurant
   }
 
-  const { geocoding: _geocoding, ...appRestaurant } = restaurant
+  const { geocoding: _geocoding, ...appRestaurant } = normalizedRestaurant
   removedGeocodingCount += 1
   return appRestaurant
 })

@@ -37,6 +37,19 @@ npm run build
 npm run data:optimize
 ```
 
+카카오 장소 ID와 업체 상세 URL을 보강하려면 `.env.example`을 `.env.local`로 복사하고 REST API 키를 입력한 뒤 실행합니다. `.env.local`은 Git에 포함되지 않습니다.
+
+```cmd
+copy .env.example .env.local
+npm run data:enrich-kakao
+```
+
+식당명 정규화 결과가 완전히 같고 저장 좌표에서 500m 안에 있는 장소만 연결합니다. 결과는 50건마다 저장되며, 중단 후 같은 명령을 실행하면 이어서 처리합니다. 소량만 시험하려면 다음처럼 실행할 수 있습니다.
+
+```cmd
+npm run data:enrich-kakao -- --limit=10
+```
+
 프로덕션 빌드 결과는 `dist` 폴더에 생성됩니다. 로컬에서 빌드 결과를 확인하려면 다음 명령을 실행합니다.
 
 ```cmd

@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "data:optimize": "node scripts/optimize-restaurants.mjs",
+    "data:enrich-kakao": "node --env-file-if-exists=.env.local scripts/enrich-kakao-places.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview"

@@ -27,10 +27,12 @@ interface FilterPanelProps {
   budget: number | null
   travelMode: TravelMode | null
   travelTimeLimit: TravelTimeLimit | null
+  hasSelections: boolean
   onCategoryChange: (category: CategoryFilter) => void
   onBudgetChange: (budget: number) => void
   onTravelModeChange: (mode: TravelMode) => void
   onTravelTimeChange: (time: TravelTimeLimit) => void
+  onReset: () => void
 }
 
 export function FilterPanel({
@@ -38,10 +40,12 @@ export function FilterPanel({
   budget,
   travelMode,
   travelTimeLimit,
+  hasSelections,
   onCategoryChange,
   onBudgetChange,
   onTravelModeChange,
   onTravelTimeChange,
+  onReset,
 }: FilterPanelProps) {
   const wideRangeLabel = travelMode === 'driving' ? '최대 20km' : '최대 2km'
 
@@ -52,7 +56,13 @@ export function FilterPanel({
           <p className="eyebrow">STEP 2</p>
           <h2>오늘의 조건</h2>
         </div>
-        <span>내 취향대로</span>
+        {hasSelections ? (
+          <button className="filter-reset-button" type="button" onClick={onReset}>
+            선택 초기화
+          </button>
+        ) : (
+          <span>내 취향대로</span>
+        )}
       </div>
 
       <fieldset>

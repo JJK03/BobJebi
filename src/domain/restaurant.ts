@@ -28,4 +28,6 @@ export interface Restaurant extends Coordinates {
   phone?: string
   address: string
   menus: Menu[]
+  kakaoPlaceId?: string
+  kakaoPlaceUrl?: string
 }
