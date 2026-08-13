@@ -5,14 +5,13 @@ import { EmptyState } from './components/EmptyState'
 import { FilterPanel } from './components/FilterPanel'
 import { LocationRequest } from './components/LocationRequest'
 import { RecommendationCard } from './components/RecommendationCard'
-import { filterRestaurants, type RestaurantCandidate } from './domain/filters'
+import { filterRestaurants } from './domain/filters'
 import {
   UNLIMITED_BUDGET,
   getTravelRangeSummary,
   getWideTravelRangeLabel,
   isUnlimitedBudget,
 } from './domain/filterOptions'
-import { pickRandomItem } from './domain/random'
 import {
   ALL_CATEGORY_FILTER,
   type CategoryFilter,
@@ -24,6 +23,7 @@ import {
 } from './domain/travel'
 import { useGeolocation } from './hooks/useGeolocation'
 import { useFilterPreferences } from './hooks/useFilterPreferences'
+import { useRestaurantDraw } from './hooks/useRestaurantDraw'
 import { useRestaurants } from './hooks/useRestaurants'
 import type { LocationSearchResult } from './services/kakaoLocationSearch'
 import { getCandidateDescription } from './utils/candidateDescription'
@@ -38,11 +38,8 @@ function App() {
   const { preferences, updatePreference, resetPreferences } =
     useFilterPreferences()
   const { category, budget, travelMode, travelTimeLimit } = preferences
-  const [selected, setSelected] = useState<RestaurantCandidate>()
   const [manualLocation, setManualLocation] = useState<LocationSearchResult>()
-  const [isDrawing, setIsDrawing] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
-  const timerRef = useRef<number | undefined>(undefined)
   const activePosition = manualLocation?.coordinates ?? position
   const candidates = useMemo(() => {
     if (
@@ -72,45 +69,20 @@ function App() {
     travelMode,
     travelTimeLimit,
   ])
+  const { selected, isDrawing, drawRestaurant, clearResult } =
+    useRestaurantDraw(candidates)
 
-  useEffect(
-    () => () => {
-      if (timerRef.current) {
-        window.clearTimeout(timerRef.current)
-      }
-    },
-    [],
-  )
-
-  const clearResult = () => {
-    setSelected(undefined)
-    setIsDrawing(false)
-    if (timerRef.current) {
-      window.clearTimeout(timerRef.current)
-    }
-  }
-
-  const drawRestaurant = () => {
-    if (isDrawing) {
+  useEffect(() => {
+    if (!selected) {
       return
     }
 
-    const winner = pickRandomItem(candidates)
-    if (!winner) {
-      return
-    }
+    const frameId = window.requestAnimationFrame(() => {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth' })
+    })
 
-    setSelected(undefined)
-    setIsDrawing(true)
-    timerRef.current = window.setTimeout(() => {
-      setSelected(winner)
-      setIsDrawing(false)
-      window.setTimeout(
-        () => resultRef.current?.scrollIntoView({ behavior: 'smooth' }),
-        50,
-      )
-    }, 1_800)
-  }
+    return () => window.cancelAnimationFrame(frameId)
+  }, [selected])
 
   const changeCategory = (value: CategoryFilter) => {
     clearResult()
