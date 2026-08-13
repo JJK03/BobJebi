@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import './DrawLots.css'
 
 const MAX_VISIBLE_LOTS = 11
 const LOT_COLORS = ['#f0c94d', '#d9e6d8', '#e8704f', '#eee7d8']

@@ -3,6 +3,7 @@ import {
   estimateTravelTimeMinutes,
   type TravelMode,
 } from '../domain/travel'
+import './RecommendationCard.css'
 
 interface RecommendationCardProps {
   candidate: RestaurantCandidate

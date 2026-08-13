@@ -8,6 +8,7 @@ import {
 } from '../domain/filterOptions'
 import type { CategoryFilter } from '../domain/restaurant'
 import type { TravelMode, TravelTimeLimit } from '../domain/travel'
+import './FilterPanel.css'
 
 interface FilterPanelProps {
   category: CategoryFilter | null

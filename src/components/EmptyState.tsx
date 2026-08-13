@@ -1,3 +1,5 @@
+import './EmptyState.css'
+
 interface EmptyStateProps {
   canResetCategory: boolean
   canRemoveBudgetLimit: boolean

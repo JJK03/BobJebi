@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import './LocationRequest.css'
 import type { LocationStatus } from '../hooks/useGeolocation'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import type { LocationSearchResult } from '../services/kakaoLocationSearch'
