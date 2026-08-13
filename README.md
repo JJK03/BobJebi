@@ -2,9 +2,17 @@
 
 현재 위치, 음식 종류, 예산, 이동 방식과 예상 시간을 바탕으로 주변 착한가격업소 한 곳을 제비뽑기로 추천하는 React 정적 웹 앱입니다.
 
+## 배포
+
+Vercel에 배포되어 있으며 아래 주소에서 바로 사용할 수 있습니다.
+
+**[randommenurecs.vercel.app](https://randommenurecs.vercel.app/)**
+
 ## 기술 구성
 
 - React + TypeScript + Vite
+- Vercel 정적 배포
+- Vercel Web Analytics + Speed Insights
 - 브라우저 Geolocation API
 - Haversine 직선거리 계산
 - 정적 JSON 데이터 9,407건
