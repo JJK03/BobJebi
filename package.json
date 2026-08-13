@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "data:optimize": "node scripts/optimize-restaurants.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview"

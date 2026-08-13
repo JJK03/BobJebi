@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { getCandidateDescription } from './candidateDescription'
 
 describe('getCandidateDescription', () => {
+  it('조건이 선택되지 않았으면 선택 안내를 반환한다', () => {
+    expect(getCandidateDescription(null, null)).toBe(
+      '조건을 모두 선택해 주세요',
+    )
+  })
+
   it('전체 음식과 예산 제한 없음일 때만 모든 후보라고 안내한다', () => {
     expect(getCandidateDescription('전체', Infinity)).toBe(
       '모든 후보가 참여해요',

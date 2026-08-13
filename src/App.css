@@ -312,6 +312,14 @@ legend {
   transform: translateY(-1px);
 }
 
+.chip:disabled {
+  color: #aaa39c;
+  border-color: #eeeae4;
+  background: #f7f5f2;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .chip.is-selected {
   color: white;
   border-color: var(--primary);
@@ -411,38 +419,24 @@ legend {
   border: 2px solid white;
   border-radius: 13px 13px 6px 6px;
   color: #8c5938;
-  background: #ffd083;
+  background: var(--lot-color, #ffd083);
   box-shadow: 0 7px 15px rgba(117, 69, 36, 0.11);
   font-size: 20px;
   font-weight: 900;
   transform-origin: center bottom;
   --lot-x: 0px;
   --lot-rotation: 0deg;
+  --lot-delay: 0ms;
+  --lot-duration: 520ms;
 }
-
-.lot-1 { --lot-x: -91px; --lot-rotation: -17deg; background: #ffc5ae; }
-.lot-2 { --lot-x: -62px; --lot-rotation: -11deg; }
-.lot-3 { --lot-x: -31px; --lot-rotation: -5deg; background: #ffe29c; }
-.lot-4 { --lot-x: 0px; --lot-rotation: 1deg; background: #ffbaa2; }
-.lot-5 { --lot-x: 31px; --lot-rotation: 6deg; }
-.lot-6 { --lot-x: 62px; --lot-rotation: 12deg; background: #ffe29c; }
-.lot-7 { --lot-x: 91px; --lot-rotation: 18deg; background: #ffc5ae; }
 
 .lot-ticket {
   transform: translateX(var(--lot-x)) rotate(var(--lot-rotation));
 }
 
 .is-drawing .lot-ticket {
-  animation: lot-shuffle 520ms ease-in-out infinite alternate;
+  animation: lot-shuffle var(--lot-duration) ease-in-out var(--lot-delay) infinite alternate;
 }
-
-.is-drawing .lot-1 { animation-delay: -80ms; }
-.is-drawing .lot-2 { animation-delay: -210ms; animation-duration: 590ms; }
-.is-drawing .lot-3 { animation-delay: -130ms; animation-duration: 480ms; }
-.is-drawing .lot-4 { animation-delay: -250ms; animation-duration: 560ms; }
-.is-drawing .lot-5 { animation-delay: -170ms; animation-duration: 500ms; }
-.is-drawing .lot-6 { animation-delay: -40ms; animation-duration: 610ms; }
-.is-drawing .lot-7 { animation-delay: -290ms; animation-duration: 540ms; }
 
 @keyframes lot-shuffle {
   from {
@@ -451,6 +445,21 @@ legend {
   to {
     transform: translateX(var(--lot-x)) translateY(-10px) rotate(var(--lot-rotation));
   }
+}
+
+.hidden-lot-count {
+  position: absolute;
+  z-index: 4;
+  right: -4px;
+  bottom: 12px;
+  padding: 5px 9px;
+  border: 2px solid white;
+  border-radius: 999px;
+  color: white;
+  background: var(--primary);
+  box-shadow: 0 5px 12px rgba(82, 47, 27, 0.16);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .picked-lot {

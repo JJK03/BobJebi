@@ -23,10 +23,10 @@ const TIME_LIMITS: { value: TravelTimeLimit; label: string }[] = [
 ]
 
 interface FilterPanelProps {
-  category: CategoryFilter
-  budget: number
-  travelMode: TravelMode
-  travelTimeLimit: TravelTimeLimit
+  category: CategoryFilter | null
+  budget: number | null
+  travelMode: TravelMode | null
+  travelTimeLimit: TravelTimeLimit | null
   onCategoryChange: (category: CategoryFilter) => void
   onBudgetChange: (budget: number) => void
   onTravelModeChange: (mode: TravelMode) => void
@@ -43,7 +43,7 @@ export function FilterPanel({
   onTravelModeChange,
   onTravelTimeChange,
 }: FilterPanelProps) {
-  const wideRangeLabel = travelMode === 'walking' ? '최대 2km' : '최대 20km'
+  const wideRangeLabel = travelMode === 'driving' ? '최대 20km' : '최대 2km'
 
   return (
     <section className="filter-panel">
@@ -119,6 +119,7 @@ export function FilterPanel({
               }
               aria-pressed={travelTimeLimit === option.value}
               onClick={() => onTravelTimeChange(option.value)}
+              disabled={travelMode === null}
               key={option.label}
             >
               {option.value === 'wide' ? wideRangeLabel : option.label}
@@ -126,8 +127,9 @@ export function FilterPanel({
           ))}
         </div>
         <p className="filter-note">
-          직선거리 기준이며, 최대 범위는 도보 2km·자차 20km예요. 실제 경로와
-          다를 수 있어요.
+          {travelMode === null
+            ? '도보 또는 자차를 먼저 선택해 주세요.'
+            : '직선거리 기준이며, 최대 범위는 도보 2km·자차 20km예요. 실제 경로와 다를 수 있어요.'}
         </p>
       </fieldset>
     </section>

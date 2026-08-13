@@ -1,6 +1,12 @@
+import type { CSSProperties } from 'react'
+
+const MAX_VISIBLE_LOTS = 11
+const LOT_COLORS = ['#ffc5ae', '#ffd083', '#ffe29c', '#ffbaa2']
+
 interface DrawLotsProps {
   candidateCount: number
   candidateDescription: string
+  allConditionsSelected: boolean
   winnerName?: string
   isDrawing: boolean
   disabled: boolean
@@ -10,11 +16,15 @@ interface DrawLotsProps {
 export function DrawLots({
   candidateCount,
   candidateDescription,
+  allConditionsSelected,
   winnerName,
   isDrawing,
   disabled,
   onDraw,
 }: DrawLotsProps) {
+  const visibleLotCount = Math.min(candidateCount, MAX_VISIBLE_LOTS)
+  const hiddenLotCount = Math.max(candidateCount - visibleLotCount, 0)
+
   return (
     <section className="draw-panel">
       <div className="section-heading">
@@ -29,10 +39,31 @@ export function DrawLots({
 
       <div className={`draw-stage ${isDrawing ? 'is-drawing' : ''}`} aria-live="polite">
         <div className="ticket-bundle" aria-hidden="true">
-          {Array.from({ length: 7 }, (_, index) => (
-            <span className={`lot-ticket lot-${index + 1}`} key={index} />
-          ))}
+          {Array.from({ length: visibleLotCount }, (_, index) => {
+            const progress = visibleLotCount === 1 ? 0.5 : index / (visibleLotCount - 1)
+            const x = -96 + progress * 192
+            const rotation = -17 + progress * 34
+
+            return (
+              <span
+                className="lot-ticket"
+                style={
+                  {
+                    '--lot-x': `${x}px`,
+                    '--lot-rotation': `${rotation}deg`,
+                    '--lot-color': LOT_COLORS[index % LOT_COLORS.length],
+                    '--lot-delay': `${-40 - index * 37}ms`,
+                    '--lot-duration': `${480 + (index % 4) * 40}ms`,
+                  } as CSSProperties
+                }
+                key={index}
+              />
+            )
+          })}
           {isDrawing && <span className="picked-lot" />}
+          {hiddenLotCount > 0 && (
+            <span className="hidden-lot-count">외 {hiddenLotCount.toLocaleString()}곳</span>
+          )}
         </div>
 
         <div className={`winning-ticket ${winnerName ? 'is-revealed' : ''}`}>
@@ -48,8 +79,18 @@ export function DrawLots({
             </>
           ) : (
             <>
-              <span className="ticket-label">{candidateDescription}</span>
-              <strong>{candidateCount > 0 ? `${candidateCount.toLocaleString()}곳 중 한 곳` : '조건을 골라주세요'}</strong>
+              <span className="ticket-label">
+                {allConditionsSelected
+                  ? candidateDescription
+                  : '조건을 모두 선택해 주세요'}
+              </span>
+              <strong>
+                {!allConditionsSelected
+                  ? '음식·예산·이동 조건을 골라주세요'
+                  : candidateCount > 0
+                    ? `${candidateCount.toLocaleString()}곳 중 한 곳`
+                    : '조건에 맞는 후보가 없어요'}
+              </strong>
             </>
           )}
         </div>

@@ -24,21 +24,22 @@ function App() {
     status: locationStatus,
     requestLocation,
   } = useGeolocation()
-  const [category, setCategory] = useState<CategoryFilter>('전체')
-  const [budget, setBudget] = useState(10_000)
-  const [travelMode, setTravelMode] = useState<TravelMode>('walking')
-  const [travelTimeLimit, setTravelTimeLimit] = useState<TravelTimeLimit>(10)
+  const [category, setCategory] = useState<CategoryFilter | null>(null)
+  const [budget, setBudget] = useState<number | null>(null)
+  const [travelMode, setTravelMode] = useState<TravelMode | null>(null)
+  const [travelTimeLimit, setTravelTimeLimit] = useState<TravelTimeLimit | null>(null)
   const [selected, setSelected] = useState<RestaurantCandidate>()
   const [isDrawing, setIsDrawing] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<number | undefined>(undefined)
-  const maxDistanceMeters = getTravelDistanceLimitMeters(
-    travelMode,
-    travelTimeLimit,
-  )
-
   const candidates = useMemo(() => {
-    if (!position) {
+    if (
+      !position ||
+      category === null ||
+      budget === null ||
+      travelMode === null ||
+      travelTimeLimit === null
+    ) {
       return []
     }
 
@@ -46,9 +47,12 @@ function App() {
       userPosition: position,
       category,
       budget,
-      maxDistanceMeters,
+      maxDistanceMeters: getTravelDistanceLimitMeters(
+        travelMode,
+        travelTimeLimit,
+      ),
     })
-  }, [restaurants, position, category, budget, maxDistanceMeters])
+  }, [restaurants, position, category, budget, travelMode, travelTimeLimit])
 
   useEffect(
     () => () => {
@@ -113,7 +117,15 @@ function App() {
     document.querySelector('.filter-panel')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const isReady = dataStatus === 'success' && locationStatus === 'success'
+  const allConditionsSelected =
+    category !== null &&
+    budget !== null &&
+    travelMode !== null &&
+    travelTimeLimit !== null
+  const isReady =
+    dataStatus === 'success' &&
+    locationStatus === 'success' &&
+    allConditionsSelected
   const candidateDescription = getCandidateDescription(category, budget)
 
   return (
@@ -177,6 +189,7 @@ function App() {
           <DrawLots
             candidateCount={candidates.length}
             candidateDescription={candidateDescription}
+            allConditionsSelected={allConditionsSelected}
             winnerName={selected?.restaurant.name}
             isDrawing={isDrawing}
             disabled={!isReady || candidates.length === 0}
@@ -192,7 +205,7 @@ function App() {
         )}
 
         <div ref={resultRef}>
-          {selected && (
+          {selected && travelMode && (
             <RecommendationCard
               candidate={selected}
               travelMode={travelMode}

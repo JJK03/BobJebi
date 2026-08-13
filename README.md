@@ -31,6 +31,12 @@ npm run lint
 npm run build
 ```
 
+앱용 식당 JSON에서 검수용 `geocoding` 필드를 제거하고 파일을 압축하려면 다음 명령을 실행합니다. 원본 전처리 파일은 별도로 보존하고 `public/data/restaurants.json`에 복사한 뒤 실행합니다.
+
+```cmd
+npm run data:optimize
+```
+
 프로덕션 빌드 결과는 `dist` 폴더에 생성됩니다. 로컬에서 빌드 결과를 확인하려면 다음 명령을 실행합니다.
 
 ```cmd

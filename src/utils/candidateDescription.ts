@@ -1,9 +1,13 @@
 import type { CategoryFilter } from '../domain/restaurant'
 
 export function getCandidateDescription(
-  category: CategoryFilter,
-  budget: number,
+  category: CategoryFilter | null,
+  budget: number | null,
 ): string {
+  if (category === null || budget === null) {
+    return '조건을 모두 선택해 주세요'
+  }
+
   const hasCategoryLimit = category !== '전체'
   const hasBudgetLimit = Number.isFinite(budget)
 
