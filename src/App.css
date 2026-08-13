@@ -373,6 +373,16 @@ legend {
   top: 24px;
   left: 50%;
   transform: translateX(-50%);
+  transform-origin: center bottom;
+}
+
+.is-drawing .ticket-bundle {
+  animation: bundle-shake 280ms ease-in-out 3 alternate;
+}
+
+@keyframes bundle-shake {
+  from { transform: translateX(-50%) rotate(-1deg); }
+  to { transform: translateX(-50%) rotate(1deg); }
 }
 
 .ticket-bundle::after {
@@ -406,27 +416,73 @@ legend {
   font-size: 20px;
   font-weight: 900;
   transform-origin: center bottom;
+  --lot-x: 0px;
+  --lot-rotation: 0deg;
 }
 
-.lot-1 { transform: translateX(-91px) rotate(-17deg); background: #ffc5ae; }
-.lot-2 { transform: translateX(-62px) rotate(-11deg); }
-.lot-3 { transform: translateX(-31px) rotate(-5deg); background: #ffe29c; }
-.lot-4 { transform: rotate(1deg); background: #ffbaa2; }
-.lot-5 { transform: translateX(31px) rotate(6deg); }
-.lot-6 { transform: translateX(62px) rotate(12deg); background: #ffe29c; }
-.lot-7 { transform: translateX(91px) rotate(18deg); background: #ffc5ae; }
+.lot-1 { --lot-x: -91px; --lot-rotation: -17deg; background: #ffc5ae; }
+.lot-2 { --lot-x: -62px; --lot-rotation: -11deg; }
+.lot-3 { --lot-x: -31px; --lot-rotation: -5deg; background: #ffe29c; }
+.lot-4 { --lot-x: 0px; --lot-rotation: 1deg; background: #ffbaa2; }
+.lot-5 { --lot-x: 31px; --lot-rotation: 6deg; }
+.lot-6 { --lot-x: 62px; --lot-rotation: 12deg; background: #ffe29c; }
+.lot-7 { --lot-x: 91px; --lot-rotation: 18deg; background: #ffc5ae; }
+
+.lot-ticket {
+  transform: translateX(var(--lot-x)) rotate(var(--lot-rotation));
+}
 
 .is-drawing .lot-ticket {
-  animation: lot-shuffle 480ms ease-in-out infinite alternate;
+  animation: lot-shuffle 520ms ease-in-out infinite alternate;
 }
 
-.is-drawing .lot-ticket:nth-child(even) {
-  animation-direction: alternate-reverse;
-}
+.is-drawing .lot-1 { animation-delay: -80ms; }
+.is-drawing .lot-2 { animation-delay: -210ms; animation-duration: 590ms; }
+.is-drawing .lot-3 { animation-delay: -130ms; animation-duration: 480ms; }
+.is-drawing .lot-4 { animation-delay: -250ms; animation-duration: 560ms; }
+.is-drawing .lot-5 { animation-delay: -170ms; animation-duration: 500ms; }
+.is-drawing .lot-6 { animation-delay: -40ms; animation-duration: 610ms; }
+.is-drawing .lot-7 { animation-delay: -290ms; animation-duration: 540ms; }
 
 @keyframes lot-shuffle {
-  from { margin-top: 0; }
-  to { margin-top: -14px; }
+  from {
+    transform: translateX(var(--lot-x)) translateY(2px) rotate(var(--lot-rotation));
+  }
+  to {
+    transform: translateX(var(--lot-x)) translateY(-10px) rotate(var(--lot-rotation));
+  }
+}
+
+.picked-lot {
+  width: 50px;
+  height: 126px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  z-index: 3;
+  left: 100px;
+  bottom: 22px;
+  border: 3px solid white;
+  border-radius: 14px 14px 7px 7px;
+  color: white;
+  background: var(--primary);
+  box-shadow: 0 12px 26px rgba(140, 63, 27, 0.28);
+  font-size: 22px;
+  animation: picked-lot-rise 1.8s cubic-bezier(0.22, 0.8, 0.24, 1) both;
+}
+
+@keyframes picked-lot-rise {
+  0%, 58% {
+    opacity: 0;
+    transform: translateY(30px) rotate(-3deg) scale(0.9);
+  }
+  64% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-66px) rotate(1deg) scale(1);
+  }
 }
 
 .winning-ticket {
@@ -468,6 +524,18 @@ legend {
   border-style: solid;
   border-color: var(--primary);
   transform: translateY(-4px);
+  animation: winning-ticket-reveal 320ms ease-out both;
+}
+
+@keyframes winning-ticket-reveal {
+  from {
+    opacity: 0.65;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-4px) scale(1);
+  }
 }
 
 .ticket-label {

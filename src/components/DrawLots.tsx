@@ -30,10 +30,9 @@ export function DrawLots({
       <div className={`draw-stage ${isDrawing ? 'is-drawing' : ''}`} aria-live="polite">
         <div className="ticket-bundle" aria-hidden="true">
           {Array.from({ length: 7 }, (_, index) => (
-            <span className={`lot-ticket lot-${index + 1}`} key={index}>
-              ?
-            </span>
+            <span className={`lot-ticket lot-${index + 1}`} key={index} />
           ))}
+          {isDrawing && <span className="picked-lot" />}
         </div>
 
         <div className={`winning-ticket ${winnerName ? 'is-revealed' : ''}`}>
