@@ -14,12 +14,30 @@ Vercel에 배포되어 있으며 아래 주소에서 바로 사용할 수 있습
 - Vercel 정적 배포
 - Vercel Web Analytics + Speed Insights
 - 브라우저 Geolocation API
+- 카카오 지도 JavaScript API 장소·주소 검색
 - Haversine 직선거리 계산
 - 정적 JSON 데이터 9,407건
 - Vitest 단위 테스트
 - 백엔드와 데이터베이스 없음
 
-카카오 REST API 키는 웹 앱에서 사용하지 않으며 저장소에도 보관하지 않습니다. 주소 좌표 변환이 끝난 정적 데이터만 사용합니다.
+카카오 REST API 키는 웹 앱에서 사용하지 않으며 저장소에도 보관하지 않습니다. 주소 좌표 변환이 끝난 정적 데이터만 사용합니다. 원하는 위치 검색에는 브라우저용 카카오 JavaScript 키를 사용하며, 카카오 개발자 콘솔의 JavaScript SDK 허용 도메인으로 사용 범위를 제한합니다.
+
+## 카카오 위치 검색 설정
+
+`.env.example`을 `.env.local`로 복사하고 카카오 JavaScript 키를 입력합니다. 이미 `.env.local`이 있다면 아래 항목만 추가합니다.
+
+```env
+VITE_KAKAO_JAVASCRIPT_KEY=발급받은_JavaScript_키
+```
+
+카카오 개발자 콘솔의 `앱 → 플랫폼 키 → JavaScript 키 → JavaScript SDK 도메인`에 다음 주소를 등록합니다.
+
+```text
+http://localhost:5173
+https://randommenurecs.vercel.app
+```
+
+Vercel 프로젝트의 `Settings → Environment Variables`에도 `VITE_KAKAO_JAVASCRIPT_KEY`를 추가하고 Production에 적용한 뒤 다시 배포합니다. 이 키는 브라우저에서 사용하는 공개 키이므로 REST API 키를 대신 입력하면 안 됩니다.
 
 ## VS Code + CMD에서 실행
 

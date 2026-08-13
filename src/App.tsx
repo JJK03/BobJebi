@@ -16,6 +16,7 @@ import {
 import { useGeolocation } from './hooks/useGeolocation'
 import { useFilterPreferences } from './hooks/useFilterPreferences'
 import { useRestaurants } from './hooks/useRestaurants'
+import type { LocationSearchResult } from './services/kakaoLocationSearch'
 import { getCandidateDescription } from './utils/candidateDescription'
 
 function App() {
@@ -29,12 +30,14 @@ function App() {
     useFilterPreferences()
   const { category, budget, travelMode, travelTimeLimit } = preferences
   const [selected, setSelected] = useState<RestaurantCandidate>()
+  const [manualLocation, setManualLocation] = useState<LocationSearchResult>()
   const [isDrawing, setIsDrawing] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<number | undefined>(undefined)
+  const activePosition = manualLocation?.coordinates ?? position
   const candidates = useMemo(() => {
     if (
-      !position ||
+      !activePosition ||
       category === null ||
       budget === null ||
       travelMode === null ||
@@ -44,7 +47,7 @@ function App() {
     }
 
     return filterRestaurants(restaurants, {
-      userPosition: position,
+      userPosition: activePosition,
       category,
       budget,
       maxDistanceMeters: getTravelDistanceLimitMeters(
@@ -52,7 +55,14 @@ function App() {
         travelTimeLimit,
       ),
     })
-  }, [restaurants, position, category, budget, travelMode, travelTimeLimit])
+  }, [
+    restaurants,
+    activePosition,
+    category,
+    budget,
+    travelMode,
+    travelTimeLimit,
+  ])
 
   useEffect(
     () => () => {
@@ -118,6 +128,17 @@ function App() {
     resetPreferences()
   }
 
+  const requestCurrentLocation = () => {
+    clearResult()
+    setManualLocation(undefined)
+    requestLocation()
+  }
+
+  const selectManualLocation = (location: LocationSearchResult) => {
+    clearResult()
+    setManualLocation(location)
+  }
+
   const scrollToFilters = () => {
     document.querySelector('.filter-panel')?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -129,7 +150,7 @@ function App() {
     travelTimeLimit !== null
   const isReady =
     dataStatus === 'success' &&
-    locationStatus === 'success' &&
+    Boolean(activePosition) &&
     allConditionsSelected
   const candidateDescription = getCandidateDescription(category, budget)
 
@@ -174,7 +195,12 @@ function App() {
           </div>
         </section>
 
-        <LocationRequest status={locationStatus} onRequest={requestLocation} />
+        <LocationRequest
+          status={locationStatus}
+          selectedLocation={manualLocation}
+          onRequest={requestCurrentLocation}
+          onSelectLocation={selectManualLocation}
+        />
 
         {dataStatus === 'loading' && (
           <div className="data-notice" role="status">
