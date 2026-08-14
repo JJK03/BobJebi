@@ -3,6 +3,10 @@ import {
   type Restaurant,
   type RestaurantCategory,
 } from '../domain/restaurant'
+import {
+  RESTAURANT_SOURCES,
+  type RestaurantSource,
+} from '../domain/restaurantSource'
 
 const categorySet = new Set<string>(RESTAURANT_CATEGORIES)
 
@@ -39,9 +43,10 @@ function isRestaurant(value: unknown): value is Restaurant {
 }
 
 export async function loadRestaurants(
+  source: RestaurantSource,
   signal?: AbortSignal,
 ): Promise<Restaurant[]> {
-  const response = await fetch('/data/restaurants.json', { signal })
+  const response = await fetch(RESTAURANT_SOURCES[source].dataPath, { signal })
 
   if (!response.ok) {
     throw new Error(`식당 데이터를 불러오지 못했습니다. (${response.status})`)

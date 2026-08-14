@@ -1,6 +1,6 @@
 # 오늘 뭐 먹지?
 
-현재 위치, 음식 종류, 예산, 이동 방식과 예상 시간을 바탕으로 주변 착한가격업소 한 곳을 제비뽑기로 추천하는 React 정적 웹 앱입니다.
+현재 위치, 음식 종류, 예산, 이동 방식과 예상 시간을 바탕으로 주변 식당 한 곳을 제비뽑기로 추천하는 React 정적 웹 앱입니다. `착한가격업소`와 `인천 스마트음식관광`을 탭으로 전환할 수 있습니다.
 
 ## 배포
 
@@ -16,7 +16,7 @@ Vercel에 배포되어 있으며 아래 주소에서 바로 사용할 수 있습
 - 브라우저 Geolocation API
 - 카카오 지도 JavaScript API 장소·주소 검색
 - Haversine 직선거리 계산
-- 정적 JSON 데이터 9,407건
+- 착한가격업소와 인천 스마트음식관광 정적 JSON 데이터
 - Vitest 단위 테스트
 - 백엔드와 데이터베이스 없음
 
@@ -86,6 +86,31 @@ npm run build
 
 `DATA_GO_KR_API_KEY`와 `GOOD_PRICE_API_URL`에는 `VITE_` 접두사를 붙이지 않습니다. `VITE_` 환경변수는 브라우저 번들에 포함될 수 있습니다.
 
+## 인천 스마트음식관광 데이터 갱신
+
+인천관광공사 스마트음식관광 API의 전용 토큰을 `.env.local`에 입력합니다. 이 토큰도 브라우저에서 사용하지 않으므로 `VITE_` 접두사를 붙이지 않습니다.
+
+```env
+INCHEON_FOOD_API_TOKEN=발급받은_전용_토큰
+```
+
+한국어 매장 기본정보와 메뉴정보를 받아 식당 ID로 결합한 뒤 `public/data/incheon-restaurants.json`을 갱신합니다.
+
+```cmd
+npm run data:sync-incheon-food
+```
+
+제공 API가 `DB_ERROR`를 반환할 때는 공공데이터포털에서 아래 두 공식 파일을 내려받아 파일 경로를 지정할 수 있습니다.
+
+- `인천관광공사_맛집_식당기본정보(다국어)` ZIP
+- `인천관광공사_맛집_식당메뉴정보(다국어)` XLSX
+
+```cmd
+npm run data:import-incheon-food -- --restaurants-zip="C:\다운로드\식당기본정보.zip" --menus-xlsx="C:\다운로드\식당메뉴정보.xlsx"
+```
+
+좌표와 가격이 있는 식당만 앱 데이터에 포함하며, 공기밥·사리·추가 메뉴·주류처럼 식사 예산 판단에 적합하지 않은 항목은 제외합니다.
+
 앱용 식당 JSON에서 검수용 `geocoding` 필드를 제거하고 파일을 압축하려면 다음 명령을 실행합니다. 원본 전처리 파일은 별도로 보존하고 `public/data/restaurants.json`에 복사한 뒤 실행합니다.
 
 ```cmd
@@ -114,7 +139,8 @@ npm run preview
 ## 주요 구조
 
 ```text
-public/data/restaurants.json  앱에서 불러오는 식당 데이터
+public/data/restaurants.json           착한가격업소 데이터
+public/data/incheon-restaurants.json  인천 스마트음식관광 데이터
 src/components/              화면 구성 요소
 src/data/                    정적 데이터 로더
 src/domain/                  거리·필터·추첨 순수 로직과 테스트

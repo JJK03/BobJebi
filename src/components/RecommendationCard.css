@@ -81,6 +81,14 @@
   list-style: none;
 }
 
+.menu-more {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-align: right;
+}
+
 .menu-box li {
   display: flex;
   justify-content: space-between;

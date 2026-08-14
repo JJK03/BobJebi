@@ -64,12 +64,59 @@ footer {
   letter-spacing: -0.055em;
 }
 
+.source-tabs {
+  margin-top: 22px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.source-tabs [role="tablist"] {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.source-tabs [role="tablist"]::-webkit-scrollbar {
+  display: none;
+}
+
+.source-tabs button {
+  min-height: 46px;
+  flex: 0 0 auto;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.source-tabs button:hover {
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.source-tabs button.is-active {
+  color: white;
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.source-tabs button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .hero-section {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
   align-items: center;
   gap: clamp(48px, 8vw, 104px);
-  margin: 54px 0 30px;
+  margin: 26px 0 30px;
   padding: 52px 6px 58px;
   border-top: 3px solid var(--ink);
   border-bottom: 1px solid var(--line-strong);
@@ -368,7 +415,7 @@ footer {
   .hero-section {
     grid-template-columns: 1fr;
     gap: 37px;
-    margin: 34px 0 20px;
+    margin: 20px 0;
     padding: 35px 2px 43px;
   }
 
@@ -384,6 +431,16 @@ footer {
   .hero-ticket {
     width: calc(100% - 9px);
     justify-self: start;
+  }
+
+  .source-tabs {
+    margin-top: 16px;
+  }
+
+  .source-tabs button {
+    min-height: 43px;
+    padding-inline: 14px;
+    font-size: 13px;
   }
 
   .filter-panel,

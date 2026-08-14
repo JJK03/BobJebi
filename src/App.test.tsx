@@ -135,6 +135,26 @@ describe("App 사용자 흐름", () => {
     expect(screen.getByText("15,000원 이하 중식 후보가 참여해요")).toBeTruthy();
   });
 
+  it("인천 스마트음식관광 탭으로 데이터 소스를 전환한다", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const goodPriceTab = screen.getByRole("tab", { name: "착한가격업소" });
+    const incheonTab = screen.getByRole("tab", {
+      name: "인천 스마트음식관광",
+    });
+    expect(goodPriceTab.getAttribute("aria-selected")).toBe("true");
+
+    await user.click(incheonTab);
+
+    expect(incheonTab.getAttribute("aria-selected")).toBe("true");
+    expect(goodPriceTab.getAttribute("aria-selected")).toBe("false");
+    expect(
+      screen.getByText("인천 스마트음식관광 식당 중", { exact: false }),
+    ).toBeTruthy();
+    expect(useRestaurants).toHaveBeenLastCalledWith("incheon-smart-food");
+  });
+
   it("빈 결과에서 음식 종류를 완화해 후보를 다시 찾는다", async () => {
     const user = userEvent.setup();
     render(<App />);

@@ -14,6 +14,10 @@ import {
 } from "./domain/filterOptions";
 import { ALL_CATEGORY_FILTER, type CategoryFilter } from "./domain/restaurant";
 import {
+  RESTAURANT_SOURCES,
+  type RestaurantSource,
+} from "./domain/restaurantSource";
+import {
   getTravelDistanceLimitMeters,
   type TravelMode,
   type TravelTimeLimit,
@@ -26,11 +30,14 @@ import type { LocationSearchResult } from "./services/kakaoLocationSearch";
 import { getCandidateDescription } from "./utils/candidateDescription";
 
 function App() {
+  const [activeSource, setActiveSource] =
+    useState<RestaurantSource>("good-price");
+  const sourceContent = RESTAURANT_SOURCES[activeSource];
   const {
     restaurants,
     status: dataStatus,
     error: dataError,
-  } = useRestaurants();
+  } = useRestaurants(activeSource);
   const {
     position,
     status: locationStatus,
@@ -121,6 +128,15 @@ function App() {
     setManualLocation(location);
   };
 
+  const changeSource = (source: RestaurantSource) => {
+    if (source === activeSource) {
+      return;
+    }
+
+    clearResult();
+    setActiveSource(source);
+  };
+
   const scrollToFilters = () => {
     document
       .querySelector(".filter-panel")
@@ -149,28 +165,52 @@ function App() {
         </a>
         <p>
           <span aria-hidden="true" />
-          전국 착한가격업소에서 골라요
+          {sourceContent.headerLabel}
         </p>
       </header>
 
       <main id="top">
+        <nav className="source-tabs" aria-label="식당 데이터 선택">
+          <div role="tablist">
+            {Object.entries(RESTAURANT_SOURCES).map(([source, content]) => (
+              <button
+                id={`source-tab-${source}`}
+                type="button"
+                role="tab"
+                aria-selected={activeSource === source}
+                aria-controls="source-panel"
+                className={activeSource === source ? "is-active" : undefined}
+                onClick={() => changeSource(source as RestaurantSource)}
+                key={source}
+              >
+                {content.tabLabel}
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        <div
+          id="source-panel"
+          role="tabpanel"
+          aria-labelledby={`source-tab-${activeSource}`}
+        >
         <section className="hero-section">
           <div className="hero-copy">
-            <p className="hero-kicker">가까운 곳에서 · 예산 안에서</p>
+            <p className="hero-kicker">{sourceContent.kicker}</p>
             <h1>
               오늘 밥은
               <br />
               뽑아서 정해요.
             </h1>
             <p>
-              위치와 조건을 고르면 가까운 착한가격 식당 중
+              {sourceContent.description}
               <br className="desktop-break" /> 한 곳을 가볍게 뽑아드려요.
             </p>
           </div>
           <div className="hero-ticket" aria-hidden="true">
             <div className="hero-ticket-head">
               <span>LOCAL MEAL LOT</span>
-              <span>GOOD PRICE</span>
+              <span>{sourceContent.ticketLabel}</span>
             </div>
             <div className="hero-ticket-number">
               <strong>
@@ -201,8 +241,7 @@ function App() {
 
         {dataStatus === "loading" && (
           <div className="data-notice" role="status">
-            <span className="loading-dot" /> 전국 식당 데이터를 불러오는
-            중입니다…
+            <span className="loading-dot" /> {sourceContent.loadingLabel}
           </div>
         )}
         {dataStatus === "error" && (
@@ -263,10 +302,11 @@ function App() {
             />
           )}
         </div>
+        </div>
       </main>
 
       <footer>
-        행정안전부 착한가격업소 데이터를 활용한 위치 기반 추천 서비스
+        {sourceContent.footerLabel}
         <span>최대 검색 범위: {getTravelRangeSummary()}</span>
       </footer>
     </div>

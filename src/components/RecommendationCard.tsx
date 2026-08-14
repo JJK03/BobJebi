@@ -25,12 +25,14 @@ export function RecommendationCard({
     restaurant.kakaoPlaceUrl ??
     (restaurant.kakaoPlaceId
       ? `https://map.kakao.com/link/map/${restaurant.kakaoPlaceId}`
-      : `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`);
+      : `https://map.kakao.com/link/map/${encodeURIComponent(restaurant.name)},${restaurant.latitude},${restaurant.longitude}`);
   const hasKakaoPlace = Boolean(
     restaurant.kakaoPlaceUrl || restaurant.kakaoPlaceId,
   );
   const travelMinutes = estimateTravelTimeMinutes(distanceMeters, travelMode);
   const travelLabel = travelMode === "walking" ? "도보" : "자차";
+  const visibleMenus = affordableMenus.slice(0, 8);
+  const hiddenMenuCount = affordableMenus.length - visibleMenus.length;
 
   return (
     <section className="result-card" aria-labelledby="result-title">
@@ -50,13 +52,16 @@ export function RecommendationCard({
       <div className="menu-box">
         <h3>예산 안에서 먹을 수 있는 메뉴</h3>
         <ul>
-          {affordableMenus.map((menu) => (
+          {visibleMenus.map((menu) => (
             <li key={`${menu.name}-${menu.price}`}>
               <span>{menu.name}</span>
               <strong>{menu.price.toLocaleString("ko-KR")}원</strong>
             </li>
           ))}
         </ul>
+        {hiddenMenuCount > 0 && (
+          <p className="menu-more">그 외 예산 안의 메뉴 {hiddenMenuCount}개</p>
+        )}
       </div>
 
       <dl className="restaurant-details">
@@ -83,7 +88,7 @@ export function RecommendationCard({
         >
           {hasKakaoPlace
             ? "카카오맵에서 식당 보기 ↗"
-            : "카카오맵에서 식당명 검색 ↗"}
+            : "카카오맵에서 위치 보기 ↗"}
         </a>
         <button className="secondary-button" type="button" onClick={onRetry}>
           같은 조건으로 다시

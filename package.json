@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "data:sync-good-price": "node --env-file-if-exists=.env.local scripts/sync-good-price-api.mjs",
+    "data:sync-incheon-food": "node --env-file-if-exists=.env.local scripts/sync-incheon-food-api.mjs",
+    "data:import-incheon-food": "node scripts/import-incheon-files.mjs",
     "data:optimize": "node scripts/optimize-restaurants.mjs",
     "data:enrich-kakao": "node --env-file-if-exists=.env.local scripts/enrich-kakao-places.mjs",
     "test": "vitest run",
