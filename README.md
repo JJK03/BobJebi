@@ -57,6 +57,35 @@ npm run lint
 npm run build
 ```
 
+## 착한가격업소 API로 데이터 갱신
+
+앱은 공공데이터 API를 브라우저에서 직접 호출하지 않습니다. 배포 전에 API 데이터를 받아 `public/data/restaurants.json`을 갱신하므로 인증키가 사용자에게 노출되지 않고, API 장애가 발생해도 배포된 앱은 계속 동작합니다.
+
+공공데이터포털의 해당 API 상세 화면에서 최신 데이터셋의 요청주소를 확인한 뒤 `.env.local`에 다음 두 항목을 추가합니다. 요청주소에는 `serviceKey` 등의 쿼리 파라미터를 붙이지 않아도 됩니다. 인증키는 가능하면 `일반 인증키(Decoding)` 값을 사용합니다.
+
+```env
+GOOD_PRICE_API_URL=https://api.odcloud.kr/api/3045247/v1/uddi:데이터셋_ID
+DATA_GO_KR_API_KEY=발급받은_공공데이터_인증키
+```
+
+다음 명령으로 데이터를 갱신합니다.
+
+```cmd
+npm run data:sync-good-price
+```
+
+동기화 과정에서는 기존 식당의 좌표와 카카오 장소 ID를 보존합니다. 새 식당은 `.env.local`의 `KAKAO_REST_API_KEY`로 주소를 좌표로 변환하며, 좌표를 찾지 못한 항목은 앱 데이터에서 제외하고 결과 건수를 출력합니다. API 응답이나 설정이 잘못되어 결과가 기존 데이터의 절반보다 적으면 원본 JSON을 덮어쓰지 않습니다.
+
+갱신 후에는 아래 명령으로 확인합니다.
+
+```cmd
+npm test
+npm run lint
+npm run build
+```
+
+`DATA_GO_KR_API_KEY`와 `GOOD_PRICE_API_URL`에는 `VITE_` 접두사를 붙이지 않습니다. `VITE_` 환경변수는 브라우저 번들에 포함될 수 있습니다.
+
 앱용 식당 JSON에서 검수용 `geocoding` 필드를 제거하고 파일을 압축하려면 다음 명령을 실행합니다. 원본 전처리 파일은 별도로 보존하고 `public/data/restaurants.json`에 복사한 뒤 실행합니다.
 
 ```cmd

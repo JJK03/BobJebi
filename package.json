@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "data:sync-good-price": "node --env-file-if-exists=.env.local scripts/sync-good-price-api.mjs",
     "data:optimize": "node scripts/optimize-restaurants.mjs",
     "data:enrich-kakao": "node --env-file-if-exists=.env.local scripts/enrich-kakao-places.mjs",
     "test": "vitest run",
