@@ -149,10 +149,11 @@ npm run preview
 ```text
 public/data/restaurants.json           착한가격업소 데이터
 public/data/incheon-restaurants.json  인천 스마트음식관광 데이터
-src/components/              화면 구성 요소
-src/data/                    정적 데이터 로더
-src/domain/                  거리·필터·추첨 순수 로직과 테스트
-src/hooks/                   데이터 및 현재 위치 상태 관리
+src/app/                     앱 진입점·전역 스타일·페이지 조립
+src/pages/menu-recommendation/ 추천 페이지 UI와 화면 전용 상태
+src/entities/restaurant/     식당 모델·필터·데이터 로더
+src/shared/api/kakao/        카카오 지도 외부 연동
+src/shared/lib/              좌표·거리·무작위 추첨 공용 로직
 ```
 
 ## 거리 기준
