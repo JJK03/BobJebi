@@ -1,46 +1,47 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import './App.css'
-import { DrawLots } from './components/DrawLots'
-import { EmptyState } from './components/EmptyState'
-import { FilterPanel } from './components/FilterPanel'
-import { LocationRequest } from './components/LocationRequest'
-import { RecommendationCard } from './components/RecommendationCard'
-import { filterRestaurants } from './domain/filters'
+import { useEffect, useMemo, useRef, useState } from "react";
+import "./App.css";
+import { DrawLots } from "./components/DrawLots";
+import { EmptyState } from "./components/EmptyState";
+import { FilterPanel } from "./components/FilterPanel";
+import { LocationRequest } from "./components/LocationRequest";
+import { RecommendationCard } from "./components/RecommendationCard";
+import { filterRestaurants } from "./domain/filters";
 import {
   UNLIMITED_BUDGET,
   getTravelRangeSummary,
   getWideTravelRangeLabel,
   isUnlimitedBudget,
-} from './domain/filterOptions'
-import {
-  ALL_CATEGORY_FILTER,
-  type CategoryFilter,
-} from './domain/restaurant'
+} from "./domain/filterOptions";
+import { ALL_CATEGORY_FILTER, type CategoryFilter } from "./domain/restaurant";
 import {
   getTravelDistanceLimitMeters,
   type TravelMode,
   type TravelTimeLimit,
-} from './domain/travel'
-import { useGeolocation } from './hooks/useGeolocation'
-import { useFilterPreferences } from './hooks/useFilterPreferences'
-import { useRestaurantDraw } from './hooks/useRestaurantDraw'
-import { useRestaurants } from './hooks/useRestaurants'
-import type { LocationSearchResult } from './services/kakaoLocationSearch'
-import { getCandidateDescription } from './utils/candidateDescription'
+} from "./domain/travel";
+import { useGeolocation } from "./hooks/useGeolocation";
+import { useFilterPreferences } from "./hooks/useFilterPreferences";
+import { useRestaurantDraw } from "./hooks/useRestaurantDraw";
+import { useRestaurants } from "./hooks/useRestaurants";
+import type { LocationSearchResult } from "./services/kakaoLocationSearch";
+import { getCandidateDescription } from "./utils/candidateDescription";
 
 function App() {
-  const { restaurants, status: dataStatus, error: dataError } = useRestaurants()
+  const {
+    restaurants,
+    status: dataStatus,
+    error: dataError,
+  } = useRestaurants();
   const {
     position,
     status: locationStatus,
     requestLocation,
-  } = useGeolocation()
+  } = useGeolocation();
   const { preferences, updatePreference, resetPreferences } =
-    useFilterPreferences()
-  const { category, budget, travelMode, travelTimeLimit } = preferences
-  const [manualLocation, setManualLocation] = useState<LocationSearchResult>()
-  const resultRef = useRef<HTMLDivElement>(null)
-  const activePosition = manualLocation?.coordinates ?? position
+    useFilterPreferences();
+  const { category, budget, travelMode, travelTimeLimit } = preferences;
+  const [manualLocation, setManualLocation] = useState<LocationSearchResult>();
+  const resultRef = useRef<HTMLDivElement>(null);
+  const activePosition = manualLocation?.coordinates ?? position;
   const candidates = useMemo(() => {
     if (
       !activePosition ||
@@ -49,7 +50,7 @@ function App() {
       travelMode === null ||
       travelTimeLimit === null
     ) {
-      return []
+      return [];
     }
 
     return filterRestaurants(restaurants, {
@@ -60,7 +61,7 @@ function App() {
         travelMode,
         travelTimeLimit,
       ),
-    })
+    });
   }, [
     restaurants,
     activePosition,
@@ -68,81 +69,88 @@ function App() {
     budget,
     travelMode,
     travelTimeLimit,
-  ])
+  ]);
   const { selected, isDrawing, drawRestaurant, clearResult } =
-    useRestaurantDraw(candidates)
+    useRestaurantDraw(candidates);
 
   useEffect(() => {
     if (!selected) {
-      return
+      return;
     }
 
     const frameId = window.requestAnimationFrame(() => {
-      resultRef.current?.scrollIntoView({ behavior: 'smooth' })
-    })
+      resultRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
 
-    return () => window.cancelAnimationFrame(frameId)
-  }, [selected])
+    return () => window.cancelAnimationFrame(frameId);
+  }, [selected]);
 
   const changeCategory = (value: CategoryFilter) => {
-    clearResult()
-    updatePreference('category', value)
-  }
+    clearResult();
+    updatePreference("category", value);
+  };
 
   const changeBudget = (value: number) => {
-    clearResult()
-    updatePreference('budget', value)
-  }
+    clearResult();
+    updatePreference("budget", value);
+  };
 
   const changeTravelMode = (value: TravelMode) => {
-    clearResult()
-    updatePreference('travelMode', value)
-  }
+    clearResult();
+    updatePreference("travelMode", value);
+  };
 
   const changeTravelTime = (value: TravelTimeLimit) => {
-    clearResult()
-    updatePreference('travelTimeLimit', value)
-  }
+    clearResult();
+    updatePreference("travelTimeLimit", value);
+  };
 
   const resetFilters = () => {
-    clearResult()
-    resetPreferences()
-  }
+    clearResult();
+    resetPreferences();
+  };
 
   const requestCurrentLocation = () => {
-    clearResult()
-    setManualLocation(undefined)
-    requestLocation()
-  }
+    clearResult();
+    setManualLocation(undefined);
+    requestLocation();
+  };
 
   const selectManualLocation = (location: LocationSearchResult) => {
-    clearResult()
-    setManualLocation(location)
-  }
+    clearResult();
+    setManualLocation(location);
+  };
 
   const scrollToFilters = () => {
-    document.querySelector('.filter-panel')?.scrollIntoView({ behavior: 'smooth' })
-  }
+    document
+      .querySelector(".filter-panel")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const allConditionsSelected =
     category !== null &&
     budget !== null &&
     travelMode !== null &&
-    travelTimeLimit !== null
+    travelTimeLimit !== null;
   const isReady =
-    dataStatus === 'success' &&
+    dataStatus === "success" &&
     Boolean(activePosition) &&
-    allConditionsSelected
-  const candidateDescription = getCandidateDescription(category, budget)
+    allConditionsSelected;
+  const candidateDescription = getCandidateDescription(category, budget);
 
   return (
     <div className="app-shell">
       <header className="site-header">
         <a className="brand" href="#top" aria-label="오늘 뭐 먹지 홈">
-          <span className="brand-mark" aria-hidden="true">한끼</span>
+          <span className="brand-mark" aria-hidden="true">
+            한끼
+          </span>
           <span className="brand-name">오늘 뭐 먹지?</span>
         </a>
-        <p><span aria-hidden="true" />전국 착한가격업소에서 골라요</p>
+        <p>
+          <span aria-hidden="true" />
+          전국 착한가격업소에서 골라요
+        </p>
       </header>
 
       <main id="top">
@@ -151,7 +159,8 @@ function App() {
             <p className="hero-kicker">가까운 곳에서 · 예산 안에서</p>
             <h1>
               오늘 밥은
-              <br />뽑아서 정해요.
+              <br />
+              뽑아서 정해요.
             </h1>
             <p>
               위치와 조건을 고르면 가까운 착한가격 식당 중
@@ -165,16 +174,19 @@ function App() {
             </div>
             <div className="hero-ticket-number">
               <strong>
-                {dataStatus === 'success'
-                  ? restaurants.length.toLocaleString('ko-KR')
-                  : '—'}
+                {dataStatus === "success"
+                  ? restaurants.length.toLocaleString("ko-KR")
+                  : "—"}
               </strong>
               <span>등록 식당</span>
             </div>
             <div className="hero-ticket-lines">
-              <span>위치</span><i />
-              <span>예산</span><i />
-              <span>메뉴</span><i />
+              <span>위치</span>
+              <i />
+              <span>예산</span>
+              <i />
+              <span>메뉴</span>
+              <i />
             </div>
             <p>조건에 맞는 후보만 넣고 한 곳을 뽑습니다.</p>
           </div>
@@ -187,12 +199,13 @@ function App() {
           onSelectLocation={selectManualLocation}
         />
 
-        {dataStatus === 'loading' && (
+        {dataStatus === "loading" && (
           <div className="data-notice" role="status">
-            <span className="loading-dot" /> 전국 식당 데이터를 불러오는 중입니다…
+            <span className="loading-dot" /> 전국 식당 데이터를 불러오는
+            중입니다…
           </div>
         )}
-        {dataStatus === 'error' && (
+        {dataStatus === "error" && (
           <div className="data-notice is-error" role="alert">
             {dataError}
           </div>
@@ -204,7 +217,9 @@ function App() {
             budget={budget}
             travelMode={travelMode}
             travelTimeLimit={travelTimeLimit}
-            hasSelections={Object.values(preferences).some((value) => value !== null)}
+            hasSelections={Object.values(preferences).some(
+              (value) => value !== null,
+            )}
             onCategoryChange={changeCategory}
             onBudgetChange={changeBudget}
             onTravelModeChange={changeTravelMode}
@@ -225,18 +240,16 @@ function App() {
         {isReady && candidates.length === 0 && (
           <EmptyState
             canResetCategory={category !== ALL_CATEGORY_FILTER}
-            canRemoveBudgetLimit={
-              budget !== null && !isUnlimitedBudget(budget)
-            }
-            canExpandTravelRange={travelTimeLimit !== 'wide'}
+            canRemoveBudgetLimit={budget !== null && !isUnlimitedBudget(budget)}
+            canExpandTravelRange={travelTimeLimit !== "wide"}
             travelRangeLabel={
               travelMode
                 ? `${getWideTravelRangeLabel(travelMode)}로 넓히기`
-                : '검색 범위 넓히기'
+                : "검색 범위 넓히기"
             }
             onResetCategory={() => changeCategory(ALL_CATEGORY_FILTER)}
             onRemoveBudgetLimit={() => changeBudget(UNLIMITED_BUDGET)}
-            onExpandTravelRange={() => changeTravelTime('wide')}
+            onExpandTravelRange={() => changeTravelTime("wide")}
           />
         )}
 
@@ -257,7 +270,7 @@ function App() {
         <span>최대 검색 범위: {getTravelRangeSummary()}</span>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

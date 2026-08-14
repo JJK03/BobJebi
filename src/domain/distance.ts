@@ -16,8 +16,8 @@ export function calculateDistanceMeters(
   const haversine =
     Math.sin(latitudeDelta / 2) ** 2 +
     Math.cos(fromLatitude) *
-      Math.cos(toLatitude) *
-      Math.sin(longitudeDelta / 2) ** 2
+    Math.cos(toLatitude) *
+    Math.sin(longitudeDelta / 2) ** 2
 
   return (
     2 *

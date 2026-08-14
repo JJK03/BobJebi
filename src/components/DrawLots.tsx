@@ -1,17 +1,17 @@
-import type { CSSProperties } from 'react'
-import './DrawLots.css'
+import type { CSSProperties } from "react";
+import "./DrawLots.css";
 
-const MAX_VISIBLE_LOTS = 11
-const LOT_COLORS = ['#f0c94d', '#d9e6d8', '#e8704f', '#eee7d8']
+const MAX_VISIBLE_LOTS = 11;
+const LOT_COLORS = ["#f0c94d", "#d9e6d8", "#e8704f", "#eee7d8"];
 
 interface DrawLotsProps {
-  candidateCount: number
-  candidateDescription: string
-  allConditionsSelected: boolean
-  winnerName?: string
-  isDrawing: boolean
-  disabled: boolean
-  onDraw: () => void
+  candidateCount: number;
+  candidateDescription: string;
+  allConditionsSelected: boolean;
+  winnerName?: string;
+  isDrawing: boolean;
+  disabled: boolean;
+  onDraw: () => void;
 }
 
 export function DrawLots({
@@ -23,8 +23,8 @@ export function DrawLots({
   disabled,
   onDraw,
 }: DrawLotsProps) {
-  const visibleLotCount = Math.min(candidateCount, MAX_VISIBLE_LOTS)
-  const hiddenLotCount = Math.max(candidateCount - visibleLotCount, 0)
+  const visibleLotCount = Math.min(candidateCount, MAX_VISIBLE_LOTS);
+  const hiddenLotCount = Math.max(candidateCount - visibleLotCount, 0);
 
   return (
     <section className="draw-panel">
@@ -38,36 +38,42 @@ export function DrawLots({
         </span>
       </div>
 
-      <div className={`draw-stage ${isDrawing ? 'is-drawing' : ''}`} aria-live="polite">
+      <div
+        className={`draw-stage ${isDrawing ? "is-drawing" : ""}`}
+        aria-live="polite"
+      >
         <div className="ticket-bundle" aria-hidden="true">
           {Array.from({ length: visibleLotCount }, (_, index) => {
-            const progress = visibleLotCount === 1 ? 0.5 : index / (visibleLotCount - 1)
-            const x = -96 + progress * 192
-            const rotation = -17 + progress * 34
+            const progress =
+              visibleLotCount === 1 ? 0.5 : index / (visibleLotCount - 1);
+            const x = -96 + progress * 192;
+            const rotation = -17 + progress * 34;
 
             return (
               <span
                 className="lot-ticket"
                 style={
                   {
-                    '--lot-x': `${x}px`,
-                    '--lot-rotation': `${rotation}deg`,
-                    '--lot-color': LOT_COLORS[index % LOT_COLORS.length],
-                    '--lot-delay': `${-40 - index * 37}ms`,
-                    '--lot-duration': `${480 + (index % 4) * 40}ms`,
+                    "--lot-x": `${x}px`,
+                    "--lot-rotation": `${rotation}deg`,
+                    "--lot-color": LOT_COLORS[index % LOT_COLORS.length],
+                    "--lot-delay": `${-40 - index * 37}ms`,
+                    "--lot-duration": `${480 + (index % 4) * 40}ms`,
                   } as CSSProperties
                 }
                 key={index}
               />
-            )
+            );
           })}
           {isDrawing && <span className="picked-lot" />}
           {hiddenLotCount > 0 && (
-            <span className="hidden-lot-count">외 {hiddenLotCount.toLocaleString()}곳</span>
+            <span className="hidden-lot-count">
+              외 {hiddenLotCount.toLocaleString()}곳
+            </span>
           )}
         </div>
 
-        <div className={`winning-ticket ${winnerName ? 'is-revealed' : ''}`}>
+        <div className={`winning-ticket ${winnerName ? "is-revealed" : ""}`}>
           {isDrawing ? (
             <>
               <span className="ticket-label">제비를 섞는 중</span>
@@ -83,14 +89,14 @@ export function DrawLots({
               <span className="ticket-label">
                 {allConditionsSelected
                   ? candidateDescription
-                  : '조건을 모두 선택해 주세요'}
+                  : "조건을 모두 선택해 주세요"}
               </span>
               <strong>
                 {!allConditionsSelected
-                  ? '음식·예산·이동 조건을 골라주세요'
+                  ? "음식·예산·이동 조건을 골라주세요"
                   : candidateCount > 0
                     ? `${candidateCount.toLocaleString()}곳 중 한 곳`
-                    : '조건에 맞는 후보가 없어요'}
+                    : "조건에 맞는 후보가 없어요"}
               </strong>
             </>
           )}
@@ -103,7 +109,11 @@ export function DrawLots({
         onClick={onDraw}
         disabled={disabled || isDrawing}
       >
-        {isDrawing ? '제비를 뽑는 중…' : winnerName ? '다시 뽑기' : '한 곳 뽑기'}
+        {isDrawing
+          ? "제비를 뽑는 중…"
+          : winnerName
+            ? "다시 뽑기"
+            : "한 곳 뽑기"}
       </button>
       {disabled && (
         <p className="draw-help">
@@ -111,5 +121,5 @@ export function DrawLots({
         </p>
       )}
     </section>
-  )
+  );
 }

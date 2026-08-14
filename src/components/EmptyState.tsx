@@ -1,13 +1,13 @@
-import './EmptyState.css'
+import "./EmptyState.css";
 
 interface EmptyStateProps {
-  canResetCategory: boolean
-  canRemoveBudgetLimit: boolean
-  canExpandTravelRange: boolean
-  travelRangeLabel: string
-  onResetCategory: () => void
-  onRemoveBudgetLimit: () => void
-  onExpandTravelRange: () => void
+  canResetCategory: boolean;
+  canRemoveBudgetLimit: boolean;
+  canExpandTravelRange: boolean;
+  travelRangeLabel: string;
+  onResetCategory: () => void;
+  onRemoveBudgetLimit: () => void;
+  onExpandTravelRange: () => void;
 }
 
 export function EmptyState({
@@ -20,7 +20,7 @@ export function EmptyState({
   onExpandTravelRange,
 }: EmptyStateProps) {
   const hasActions =
-    canResetCategory || canRemoveBudgetLimit || canExpandTravelRange
+    canResetCategory || canRemoveBudgetLimit || canExpandTravelRange;
 
   return (
     <section className="empty-state" role="status">
@@ -29,8 +29,8 @@ export function EmptyState({
         <h2>선택한 조건에 해당하는 식당이 없어요</h2>
         <p>
           {hasActions
-            ? '아래 조건을 완화하면 후보를 찾기 쉬워집니다.'
-            : '현재 위치의 최대 검색 범위에 등록된 식당이 없습니다.'}
+            ? "아래 조건을 완화하면 후보를 찾기 쉬워집니다."
+            : "현재 위치의 최대 검색 범위에 등록된 식당이 없습니다."}
         </p>
       </div>
       {hasActions && (
@@ -65,5 +65,5 @@ export function EmptyState({
         </div>
       )}
     </section>
-  )
+  );
 }

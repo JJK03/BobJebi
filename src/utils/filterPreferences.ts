@@ -72,7 +72,7 @@ export function parseFilterPreferences(
           : null
     const travelMode =
       typeof stored.travelMode === 'string' &&
-      travelModes.has(stored.travelMode as TravelMode)
+        travelModes.has(stored.travelMode as TravelMode)
         ? (stored.travelMode as TravelMode)
         : null
     const travelTimeLimit = travelTimeLimits.has(

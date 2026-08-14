@@ -6,7 +6,7 @@
 
 Vercel에 배포되어 있으며 아래 주소에서 바로 사용할 수 있습니다.
 
-**[randommenurecs.vercel.app](https://randommenurecs.vercel.app/)**
+**[bobjebi.vercel.app](https://bobjebi.vercel.app/)**
 
 ## 기술 구성
 

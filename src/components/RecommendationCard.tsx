@@ -1,21 +1,18 @@
-import type { RestaurantCandidate } from '../domain/filters'
-import {
-  estimateTravelTimeMinutes,
-  type TravelMode,
-} from '../domain/travel'
-import './RecommendationCard.css'
+import type { RestaurantCandidate } from "../domain/filters";
+import { estimateTravelTimeMinutes, type TravelMode } from "../domain/travel";
+import "./RecommendationCard.css";
 
 interface RecommendationCardProps {
-  candidate: RestaurantCandidate
-  travelMode: TravelMode
-  onRetry: () => void
-  onChangeConditions: () => void
+  candidate: RestaurantCandidate;
+  travelMode: TravelMode;
+  onRetry: () => void;
+  onChangeConditions: () => void;
 }
 
 const formatDistance = (meters: number) =>
   meters < 1_000
     ? `${Math.round(meters)}m`
-    : `${(meters / 1_000).toFixed(1)}km`
+    : `${(meters / 1_000).toFixed(1)}km`;
 
 export function RecommendationCard({
   candidate,
@@ -23,17 +20,17 @@ export function RecommendationCard({
   onRetry,
   onChangeConditions,
 }: RecommendationCardProps) {
-  const { restaurant, affordableMenus, distanceMeters } = candidate
+  const { restaurant, affordableMenus, distanceMeters } = candidate;
   const kakaoMapUrl =
     restaurant.kakaoPlaceUrl ??
     (restaurant.kakaoPlaceId
       ? `https://map.kakao.com/link/map/${restaurant.kakaoPlaceId}`
-      : `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`)
+      : `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`);
   const hasKakaoPlace = Boolean(
     restaurant.kakaoPlaceUrl || restaurant.kakaoPlaceId,
-  )
-  const travelMinutes = estimateTravelTimeMinutes(distanceMeters, travelMode)
-  const travelLabel = travelMode === 'walking' ? '도보' : '자차'
+  );
+  const travelMinutes = estimateTravelTimeMinutes(distanceMeters, travelMode);
+  const travelLabel = travelMode === "walking" ? "도보" : "자차";
 
   return (
     <section className="result-card" aria-labelledby="result-title">
@@ -43,8 +40,8 @@ export function RecommendationCard({
           <p className="eyebrow">뽑기 결과</p>
           <h2 id="result-title">{restaurant.name}</h2>
           <p className="result-summary">
-            {restaurant.category} · 직선거리 {formatDistance(distanceMeters)} · 예상 {travelLabel}{' '}
-            {travelMinutes}분
+            {restaurant.category} · 직선거리 {formatDistance(distanceMeters)} ·
+            예상 {travelLabel} {travelMinutes}분
           </p>
         </div>
         <span className="category-badge">{restaurant.category}</span>
@@ -56,7 +53,7 @@ export function RecommendationCard({
           {affordableMenus.map((menu) => (
             <li key={`${menu.name}-${menu.price}`}>
               <span>{menu.name}</span>
-              <strong>{menu.price.toLocaleString('ko-KR')}원</strong>
+              <strong>{menu.price.toLocaleString("ko-KR")}원</strong>
             </li>
           ))}
         </ul>
@@ -85,16 +82,20 @@ export function RecommendationCard({
           rel="noreferrer"
         >
           {hasKakaoPlace
-            ? '카카오맵에서 식당 보기 ↗'
-            : '카카오맵에서 식당명 검색 ↗'}
+            ? "카카오맵에서 식당 보기 ↗"
+            : "카카오맵에서 식당명 검색 ↗"}
         </a>
         <button className="secondary-button" type="button" onClick={onRetry}>
           같은 조건으로 다시
         </button>
-        <button className="text-button" type="button" onClick={onChangeConditions}>
+        <button
+          className="text-button"
+          type="button"
+          onClick={onChangeConditions}
+        >
           조건 변경하기
         </button>
       </div>
     </section>
-  )
+  );
 }

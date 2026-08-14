@@ -1,6 +1,7 @@
 :root {
-  font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo',
-    'Noto Sans KR', 'Segoe UI', sans-serif;
+  font-family:
+    "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR",
+    "Segoe UI", sans-serif;
   font-size: 17px;
   color: #243029;
   background: #f1eee6;
@@ -38,7 +39,10 @@ body {
   line-height: 1.55;
   letter-spacing: -0.018em;
   background-color: #f1eee6;
-  background-image: linear-gradient(rgba(24, 34, 28, 0.025) 1px, transparent 1px);
+  background-image: linear-gradient(
+    rgba(24, 34, 28, 0.025) 1px,
+    transparent 1px
+  );
   background-size: 100% 32px;
 }
 

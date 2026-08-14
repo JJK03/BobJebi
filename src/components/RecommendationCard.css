@@ -9,7 +9,7 @@
 }
 
 .result-card::before {
-  content: 'PICKED / LOCAL MEAL';
+  content: "PICKED / LOCAL MEAL";
   position: absolute;
   top: 14px;
   right: 17px;
@@ -89,8 +89,13 @@
   border-top: 1px dashed var(--line);
 }
 
-.menu-box li:first-child { border-top: 0; }
-.menu-box strong { color: var(--primary-dark); white-space: nowrap; }
+.menu-box li:first-child {
+  border-top: 0;
+}
+.menu-box strong {
+  color: var(--primary-dark);
+  white-space: nowrap;
+}
 
 .restaurant-details {
   margin: 21px 0;
@@ -115,7 +120,9 @@
   font-size: 14px;
 }
 
-.restaurant-details a { color: inherit; }
+.restaurant-details a {
+  color: inherit;
+}
 
 .result-actions {
   display: flex;
@@ -146,7 +153,9 @@
   background: transparent;
 }
 
-.text-button:hover { color: var(--primary-dark); }
+.text-button:hover {
+  color: var(--primary-dark);
+}
 
 @media (max-width: 680px) {
   .result-card {
@@ -155,8 +164,18 @@
     box-shadow: 6px 6px 0 var(--primary-soft);
   }
 
-  .result-card::before { display: none; }
-  .result-title-row { flex-direction: column-reverse; gap: 11px; }
-  .result-title-row h2 { font-size: 34px; }
-  .result-actions > * { width: 100%; box-sizing: border-box; }
+  .result-card::before {
+    display: none;
+  }
+  .result-title-row {
+    flex-direction: column-reverse;
+    gap: 11px;
+  }
+  .result-title-row h2 {
+    font-size: 34px;
+  }
+  .result-actions > * {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }

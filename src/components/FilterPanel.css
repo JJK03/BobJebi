@@ -42,8 +42,12 @@ legend {
   gap: 7px;
 }
 
-.chip-group.two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.chip-group.three-columns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.chip-group.two-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.chip-group.three-columns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 
 .chip {
   min-height: 42px;
@@ -56,7 +60,10 @@ legend {
   font-size: 14px;
   font-weight: 750;
   cursor: pointer;
-  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease,
+    background 140ms ease;
 }
 
 .chip:hover:not(:disabled) {
@@ -87,5 +94,9 @@ legend {
 }
 
 @media (max-width: 680px) {
-  .chip { min-height: 41px; padding-inline: 5px; font-size: 13px; }
+  .chip {
+    min-height: 41px;
+    padding-inline: 5px;
+    font-size: 13px;
+  }
 }

@@ -31,7 +31,7 @@
 }
 
 .draw-stage::before {
-  content: 'RANDOM PICK';
+  content: "RANDOM PICK";
   position: absolute;
   top: 12px;
   right: 14px;
@@ -57,12 +57,16 @@
 }
 
 @keyframes bundle-shake {
-  from { transform: translateX(-50%) rotate(-1deg); }
-  to { transform: translateX(-50%) rotate(1deg); }
+  from {
+    transform: translateX(-50%) rotate(-1deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(1deg);
+  }
 }
 
 .ticket-bundle::after {
-  content: '';
+  content: "";
   width: 272px;
   height: 70px;
   position: absolute;
@@ -95,7 +99,7 @@
 }
 
 .lot-ticket::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 9px 8px auto;
   height: 2px;
@@ -104,12 +108,19 @@
 }
 
 .is-drawing .lot-ticket {
-  animation: lot-shuffle var(--lot-duration) ease-in-out var(--lot-delay) infinite alternate;
+  animation: lot-shuffle var(--lot-duration) ease-in-out var(--lot-delay)
+    infinite alternate;
 }
 
 @keyframes lot-shuffle {
-  from { transform: translateX(var(--lot-x)) translateY(2px) rotate(var(--lot-rotation)); }
-  to { transform: translateX(var(--lot-x)) translateY(-8px) rotate(var(--lot-rotation)); }
+  from {
+    transform: translateX(var(--lot-x)) translateY(2px)
+      rotate(var(--lot-rotation));
+  }
+  to {
+    transform: translateX(var(--lot-x)) translateY(-8px)
+      rotate(var(--lot-rotation));
+  }
 }
 
 .hidden-lot-count {
@@ -140,7 +151,7 @@
 }
 
 .picked-lot::after {
-  content: '';
+  content: "";
   width: 22px;
   height: 2px;
   position: absolute;
@@ -150,9 +161,18 @@
 }
 
 @keyframes picked-lot-rise {
-  0%, 58% { opacity: 0; transform: translateY(30px) rotate(-3deg) scale(0.9); }
-  64% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-62px) rotate(1deg) scale(1); }
+  0%,
+  58% {
+    opacity: 0;
+    transform: translateY(30px) rotate(-3deg) scale(0.9);
+  }
+  64% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-62px) rotate(1deg) scale(1);
+  }
 }
 
 .winning-ticket {
@@ -175,7 +195,7 @@
 
 .winning-ticket::before,
 .winning-ticket::after {
-  content: '';
+  content: "";
   width: 18px;
   height: 18px;
   position: absolute;
@@ -186,8 +206,12 @@
   transform: translateY(-50%);
 }
 
-.winning-ticket::before { left: -10px; }
-.winning-ticket::after { right: -10px; }
+.winning-ticket::before {
+  left: -10px;
+}
+.winning-ticket::after {
+  right: -10px;
+}
 
 .winning-ticket.is-revealed {
   border-width: 2px;
@@ -197,8 +221,14 @@
 }
 
 @keyframes winning-ticket-reveal {
-  from { opacity: 0.7; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(-3px); }
+  from {
+    opacity: 0.7;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
 }
 
 .ticket-label {
@@ -226,18 +256,33 @@
 }
 
 @media (max-width: 900px) {
-  .draw-panel { position: static; }
+  .draw-panel {
+    position: static;
+  }
 }
 
 @media (max-width: 680px) {
-  .draw-stage { min-height: 344px; padding-inline: 15px; }
-  .ticket-bundle { transform: translateX(-50%) scale(0.9); }
-  .is-drawing .ticket-bundle { animation-name: bundle-shake-mobile; }
-
-  @keyframes bundle-shake-mobile {
-    from { transform: translateX(-50%) scale(0.9) rotate(-1deg); }
-    to { transform: translateX(-50%) scale(0.9) rotate(1deg); }
+  .draw-stage {
+    min-height: 344px;
+    padding-inline: 15px;
+  }
+  .ticket-bundle {
+    transform: translateX(-50%) scale(0.9);
+  }
+  .is-drawing .ticket-bundle {
+    animation-name: bundle-shake-mobile;
   }
 
-  .winning-ticket { padding-inline: 19px; }
+  @keyframes bundle-shake-mobile {
+    from {
+      transform: translateX(-50%) scale(0.9) rotate(-1deg);
+    }
+    to {
+      transform: translateX(-50%) scale(0.9) rotate(1deg);
+    }
+  }
+
+  .winning-ticket {
+    padding-inline: 19px;
+  }
 }

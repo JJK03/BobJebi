@@ -5,22 +5,22 @@ import {
   getWideTravelRangeLabel,
   TRAVEL_MODE_OPTIONS,
   TRAVEL_TIME_LIMIT_OPTIONS,
-} from '../domain/filterOptions'
-import type { CategoryFilter } from '../domain/restaurant'
-import type { TravelMode, TravelTimeLimit } from '../domain/travel'
-import './FilterPanel.css'
+} from "../domain/filterOptions";
+import type { CategoryFilter } from "../domain/restaurant";
+import type { TravelMode, TravelTimeLimit } from "../domain/travel";
+import "./FilterPanel.css";
 
 interface FilterPanelProps {
-  category: CategoryFilter | null
-  budget: number | null
-  travelMode: TravelMode | null
-  travelTimeLimit: TravelTimeLimit | null
-  hasSelections: boolean
-  onCategoryChange: (category: CategoryFilter) => void
-  onBudgetChange: (budget: number) => void
-  onTravelModeChange: (mode: TravelMode) => void
-  onTravelTimeChange: (time: TravelTimeLimit) => void
-  onReset: () => void
+  category: CategoryFilter | null;
+  budget: number | null;
+  travelMode: TravelMode | null;
+  travelTimeLimit: TravelTimeLimit | null;
+  hasSelections: boolean;
+  onCategoryChange: (category: CategoryFilter) => void;
+  onBudgetChange: (budget: number) => void;
+  onTravelModeChange: (mode: TravelMode) => void;
+  onTravelTimeChange: (time: TravelTimeLimit) => void;
+  onReset: () => void;
 }
 
 export function FilterPanel({
@@ -37,7 +37,7 @@ export function FilterPanel({
 }: FilterPanelProps) {
   const wideRangeLabel = travelMode
     ? getWideTravelRangeLabel(travelMode)
-    : '넓게 보기'
+    : "넓게 보기";
 
   return (
     <section className="filter-panel">
@@ -47,7 +47,11 @@ export function FilterPanel({
           <h2>오늘의 조건</h2>
         </div>
         {hasSelections ? (
-          <button className="filter-reset-button" type="button" onClick={onReset}>
+          <button
+            className="filter-reset-button"
+            type="button"
+            onClick={onReset}
+          >
             선택 초기화
           </button>
         ) : (
@@ -61,7 +65,7 @@ export function FilterPanel({
           {CATEGORY_FILTER_OPTIONS.map((option) => (
             <button
               type="button"
-              className={category === option ? 'chip is-selected' : 'chip'}
+              className={category === option ? "chip is-selected" : "chip"}
               aria-pressed={category === option}
               onClick={() => onCategoryChange(option)}
               key={option}
@@ -78,7 +82,7 @@ export function FilterPanel({
           {BUDGET_OPTIONS.map((option) => (
             <button
               type="button"
-              className={budget === option.value ? 'chip is-selected' : 'chip'}
+              className={budget === option.value ? "chip is-selected" : "chip"}
               aria-pressed={budget === option.value}
               onClick={() => onBudgetChange(option.value)}
               key={option.label}
@@ -95,7 +99,9 @@ export function FilterPanel({
           {TRAVEL_MODE_OPTIONS.map((option) => (
             <button
               type="button"
-              className={travelMode === option.value ? 'chip is-selected' : 'chip'}
+              className={
+                travelMode === option.value ? "chip is-selected" : "chip"
+              }
               aria-pressed={travelMode === option.value}
               onClick={() => onTravelModeChange(option.value)}
               key={option.value}
@@ -113,23 +119,23 @@ export function FilterPanel({
             <button
               type="button"
               className={
-                travelTimeLimit === option.value ? 'chip is-selected' : 'chip'
+                travelTimeLimit === option.value ? "chip is-selected" : "chip"
               }
               aria-pressed={travelTimeLimit === option.value}
               onClick={() => onTravelTimeChange(option.value)}
               disabled={travelMode === null}
               key={option.label}
             >
-              {option.value === 'wide' ? wideRangeLabel : option.label}
+              {option.value === "wide" ? wideRangeLabel : option.label}
             </button>
           ))}
         </div>
         <p className="filter-note">
           {travelMode === null
-            ? '도보 또는 자차를 먼저 선택해 주세요.'
+            ? "도보 또는 자차를 먼저 선택해 주세요."
             : `직선거리 기준이며, 최대 범위는 ${getTravelRangeSummary()}예요. 실제 경로와 다를 수 있어요.`}
         </p>
       </fieldset>
     </section>
-  )
+  );
 }

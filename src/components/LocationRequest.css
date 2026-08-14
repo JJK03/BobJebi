@@ -80,7 +80,7 @@
 
 .location-divider::before,
 .location-divider::after {
-  content: '';
+  content: "";
   height: 1px;
   flex: 1;
   background: var(--line);
@@ -232,8 +232,17 @@
     grid-column: 1 / -1;
   }
 
-  .location-search-area { padding-top: 1px; }
-  .location-search-form { grid-template-columns: minmax(0, 1fr) 68px; }
-  .location-search-button { min-width: 0; padding-inline: 9px; }
-  .location-search-results button { padding-inline: 11px; }
+  .location-search-area {
+    padding-top: 1px;
+  }
+  .location-search-form {
+    grid-template-columns: minmax(0, 1fr) 68px;
+  }
+  .location-search-button {
+    min-width: 0;
+    padding-inline: 9px;
+  }
+  .location-search-results button {
+    padding-inline: 11px;
+  }
 }

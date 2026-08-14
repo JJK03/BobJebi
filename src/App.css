@@ -85,7 +85,7 @@ footer {
 }
 
 .hero-kicker::before {
-  content: '';
+  content: "";
   width: 22px;
   height: 2px;
   display: inline-block;
@@ -122,7 +122,7 @@ footer {
 
 .hero-ticket::before,
 .hero-ticket::after {
-  content: '';
+  content: "";
   width: 18px;
   height: 18px;
   position: absolute;
@@ -132,8 +132,12 @@ footer {
   background: #f1eee6;
 }
 
-.hero-ticket::before { left: -11px; }
-.hero-ticket::after { right: -11px; }
+.hero-ticket::before {
+  left: -11px;
+}
+.hero-ticket::after {
+  right: -11px;
+}
 
 .hero-ticket-head {
   display: flex;
@@ -228,7 +232,10 @@ footer {
 }
 
 @keyframes pulse {
-  to { opacity: 0.25; transform: scale(0.75); }
+  to {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
 }
 
 .planner-grid {
@@ -276,7 +283,10 @@ footer {
   font-family: inherit;
   font-weight: 850;
   cursor: pointer;
-  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
 }
 
 .primary-button {
@@ -336,7 +346,9 @@ footer {
     gap: 36px;
   }
 
-  .planner-grid { grid-template-columns: 1fr; }
+  .planner-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 680px) {
@@ -346,8 +358,12 @@ footer {
     width: min(100% - 32px, 1160px);
   }
 
-  .site-header { min-height: 64px; }
-  .site-header p { display: none; }
+  .site-header {
+    min-height: 64px;
+  }
+  .site-header p {
+    display: none;
+  }
 
   .hero-section {
     grid-template-columns: 1fr;
@@ -356,23 +372,43 @@ footer {
     padding: 35px 2px 43px;
   }
 
-  .hero-copy h1 { font-size: clamp(46px, 15vw, 60px); }
-  .hero-copy > p:last-child { font-size: 15px; }
-  .desktop-break { display: none; }
-  .hero-ticket { width: calc(100% - 9px); justify-self: start; }
+  .hero-copy h1 {
+    font-size: clamp(46px, 15vw, 60px);
+  }
+  .hero-copy > p:last-child {
+    font-size: 15px;
+  }
+  .desktop-break {
+    display: none;
+  }
+  .hero-ticket {
+    width: calc(100% - 9px);
+    justify-self: start;
+  }
 
   .filter-panel,
-  .draw-panel { padding: 21px 18px; }
-  .section-heading { margin-bottom: 21px; }
+  .draw-panel {
+    padding: 21px 18px;
+  }
+  .section-heading {
+    margin-bottom: 21px;
+  }
   .section-heading h2,
   .location-copy h2,
-  .empty-state h2 { font-size: 21px; }
+  .empty-state h2 {
+    font-size: 21px;
+  }
 
-  footer { flex-direction: column; gap: 5px; }
+  footer {
+    flex-direction: column;
+    gap: 5px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
