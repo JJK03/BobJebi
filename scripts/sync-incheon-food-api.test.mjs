@@ -4,6 +4,7 @@ import {
   findIncheonDistrict,
   inferIncheonCategory,
   isIncheonMealMenu,
+  preserveKakaoPlaces,
 } from "./sync-incheon-food-api.mjs";
 import { parseCsv } from "./import-incheon-files.mjs";
 
@@ -103,5 +104,28 @@ describe("인천 스마트음식관광 API 변환", () => {
         [{ RSTR_ID: 1, MENU_NM: "메뉴", MENU_PRC: 10_000 }],
       ),
     ).toEqual([]);
+  });
+
+  it("데이터 갱신 시 기존 카카오 장소 정보를 보존한다", () => {
+    expect(
+      preserveKakaoPlaces(
+        [{ id: "incheon-1", name: "새 이름" }],
+        [
+          {
+            id: "incheon-1",
+            name: "기존 이름",
+            kakaoPlaceId: "123",
+            kakaoPlaceUrl: "https://place.map.kakao.com/123",
+          },
+        ],
+      ),
+    ).toEqual([
+      {
+        id: "incheon-1",
+        name: "새 이름",
+        kakaoPlaceId: "123",
+        kakaoPlaceUrl: "https://place.map.kakao.com/123",
+      },
+    ]);
   });
 });

@@ -6,6 +6,7 @@ const KAKAO_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
 const DEFAULT_DATA_PATH = "public/data/restaurants.json";
 const DEFAULT_PROGRESS_PATH = ".cache/kakao-place-progress.json";
 const MAX_MATCH_DISTANCE_METERS = 500;
+const MAX_NAME_ONLY_DISTANCE_METERS = 150;
 const CHECKPOINT_INTERVAL = 50;
 
 const wait = (milliseconds) =>
@@ -19,30 +20,59 @@ export function normalizePlaceName(name) {
     .replace(/[^0-9a-z가-힣]/g, "");
 }
 
+export function normalizePlaceAddress(address) {
+  return String(address ?? "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/인천광역시|인천시|인천/g, "")
+    .replace(/[^0-9a-z가-힣]/g, "");
+}
+
 export function selectKakaoPlace(
   documents,
   restaurant,
   maxDistanceMeters = MAX_MATCH_DISTANCE_METERS,
 ) {
   const normalizedRestaurantName = normalizePlaceName(restaurant.name);
+  const normalizedRestaurantAddress = normalizePlaceAddress(
+    restaurant.address,
+  );
 
   return documents
-    .filter(
-      (document) =>
-        normalizePlaceName(document.place_name) === normalizedRestaurantName,
-    )
     .map((document) => ({
       document,
       distance: Number(document.distance),
+      exactName:
+        normalizePlaceName(document.place_name) === normalizedRestaurantName,
+      exactAddress:
+        normalizedRestaurantAddress.length > 0 &&
+        [document.road_address_name, document.address_name].some(
+          (address) =>
+            normalizePlaceAddress(address) === normalizedRestaurantAddress,
+        ),
+      isFoodOrCafe: ["FD6", "CE7"].includes(document.category_group_code),
     }))
     .filter(
-      ({ distance }) =>
-        Number.isFinite(distance) && distance <= maxDistanceMeters,
+      ({ distance, exactName, exactAddress, isFoodOrCafe }) =>
+        Number.isFinite(distance) &&
+        distance <= maxDistanceMeters &&
+        ((exactName && distance <= MAX_NAME_ONLY_DISTANCE_METERS) ||
+          (exactAddress && isFoodOrCafe)),
     )
-    .sort((left, right) => left.distance - right.distance)[0]?.document;
+    .sort((left, right) => {
+      if (left.exactName !== right.exactName) {
+        return left.exactName ? -1 : 1;
+      }
+      return left.distance - right.distance;
+    })[0]?.document;
 }
 
-async function searchKakaoPlace(restaurant, apiKey, retries = 3) {
+async function searchKakaoPlace(
+  restaurant,
+  apiKey,
+  retries = 3,
+  requestTimeoutMilliseconds = 10_000,
+) {
   const url = new URL(KAKAO_SEARCH_URL);
   url.searchParams.set("query", restaurant.name);
   url.searchParams.set("x", String(restaurant.longitude));
@@ -52,9 +82,22 @@ async function searchKakaoPlace(restaurant, apiKey, retries = 3) {
   url.searchParams.set("sort", "distance");
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
-    const response = await fetch(url, {
-      headers: { Authorization: `KakaoAK ${apiKey}` },
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        headers: { Authorization: `KakaoAK ${apiKey}` },
+        signal: AbortSignal.timeout(requestTimeoutMilliseconds),
+      });
+    } catch (error) {
+      if (attempt === retries) {
+        throw new Error(
+          `카카오 장소 검색 응답 시간이 초과됐습니다. (${restaurant.name})`,
+          { cause: error },
+        );
+      }
+      await wait(500 * 2 ** attempt);
+      continue;
+    }
 
     if (response.ok) {
       const body = await response.json();
@@ -130,6 +173,10 @@ async function main() {
   const limitText = readArgument("limit", "Infinity");
   const limit = limitText === "Infinity" ? Infinity : Number(limitText);
   const delayMilliseconds = Number(readArgument("delay", "100"));
+  const concurrency = Number(readArgument("concurrency", "1"));
+  const requestTimeoutMilliseconds = Number(
+    readArgument("request-timeout", "10000"),
+  );
   const restaurants = await readJson(dataPath, []);
   const progress = await readJson(progressPath, { processedIds: [] });
   const processedIds = new Set(progress.processedIds ?? []);
@@ -142,6 +189,9 @@ async function main() {
   if (!Number.isFinite(limit) && limit !== Infinity) {
     throw new Error("--limit 값이 올바르지 않습니다.");
   }
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 10) {
+    throw new Error("--concurrency는 1~10 사이의 정수여야 합니다.");
+  }
 
   const saveCheckpoint = async () => {
     await writeJsonAtomic(dataPath, restaurants);
@@ -151,40 +201,61 @@ async function main() {
     });
   };
 
-  for (let index = 0; index < restaurants.length; index += 1) {
-    const restaurant = restaurants[index];
+  const pendingIndexes = restaurants
+    .map((restaurant, index) => ({ restaurant, index }))
+    .filter(
+      ({ restaurant }) =>
+        !processedIds.has(restaurant.id) && !restaurant.kakaoPlaceId,
+    )
+    .slice(0, limit === Infinity ? undefined : limit)
+    .map(({ index }) => index);
+  let lastCheckpointCount = 0;
 
-    if (
-      processedThisRun >= limit ||
-      processedIds.has(restaurant.id) ||
-      restaurant.kakaoPlaceId
-    ) {
-      continue;
+  for (let offset = 0; offset < pendingIndexes.length; offset += concurrency) {
+    const batchIndexes = pendingIndexes.slice(offset, offset + concurrency);
+    const places = await Promise.all(
+      batchIndexes.map((index) =>
+        searchKakaoPlace(
+          restaurants[index],
+          apiKey,
+          3,
+          requestTimeoutMilliseconds,
+        ),
+      ),
+    );
+
+    for (let batchIndex = 0; batchIndex < batchIndexes.length; batchIndex += 1) {
+      const index = batchIndexes[batchIndex];
+      const restaurant = restaurants[index];
+      const place = places[batchIndex];
+
+      if (place) {
+        restaurants[index] = {
+          ...restaurant,
+          kakaoPlaceId: place.id,
+          kakaoPlaceUrl:
+            place.place_url?.replace(/^http:/, "https:") ||
+            `https://map.kakao.com/link/map/${place.id}`,
+        };
+        matchedThisRun += 1;
+      }
+
+      processedIds.add(restaurant.id);
+      processedThisRun += 1;
     }
 
-    const place = await searchKakaoPlace(restaurant, apiKey);
-    if (place) {
-      restaurants[index] = {
-        ...restaurant,
-        kakaoPlaceId: place.id,
-        kakaoPlaceUrl:
-          place.place_url?.replace(/^http:/, "https:") ||
-          `https://map.kakao.com/link/map/${place.id}`,
-      };
-      matchedThisRun += 1;
-    }
-
-    processedIds.add(restaurant.id);
-    processedThisRun += 1;
-
-    if (processedThisRun % CHECKPOINT_INTERVAL === 0) {
+    if (processedThisRun - lastCheckpointCount >= CHECKPOINT_INTERVAL) {
       await saveCheckpoint();
+      lastCheckpointCount = processedThisRun;
       console.log(
         `진행 ${processedIds.size.toLocaleString("ko-KR")}/${restaurants.length.toLocaleString("ko-KR")} · 이번 실행 매칭 ${matchedThisRun.toLocaleString("ko-KR")}건`,
       );
     }
 
-    if (delayMilliseconds > 0) {
+    if (
+      delayMilliseconds > 0 &&
+      offset + concurrency < pendingIndexes.length
+    ) {
       await wait(delayMilliseconds);
     }
   }

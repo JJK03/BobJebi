@@ -25,7 +25,7 @@ export function RecommendationCard({
     restaurant.kakaoPlaceUrl ??
     (restaurant.kakaoPlaceId
       ? `https://map.kakao.com/link/map/${restaurant.kakaoPlaceId}`
-      : `https://map.kakao.com/link/map/${encodeURIComponent(restaurant.name)},${restaurant.latitude},${restaurant.longitude}`);
+      : `https://map.kakao.com/?q=${encodeURIComponent(`${restaurant.name} ${restaurant.district}`)}`);
   const hasKakaoPlace = Boolean(
     restaurant.kakaoPlaceUrl || restaurant.kakaoPlaceId,
   );
@@ -88,7 +88,7 @@ export function RecommendationCard({
         >
           {hasKakaoPlace
             ? "카카오맵에서 식당 보기 ↗"
-            : "카카오맵에서 위치 보기 ↗"}
+            : "카카오맵에서 식당 검색 ↗"}
         </a>
         <button className="secondary-button" type="button" onClick={onRetry}>
           같은 조건으로 다시

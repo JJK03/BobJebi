@@ -1,8 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { adaptIncheonRows } from "./sync-incheon-food-api.mjs";
+import {
+  adaptIncheonRows,
+  preserveKakaoPlaces,
+} from "./sync-incheon-food-api.mjs";
 
 const BASIC_CSV_ENTRY =
   "DATAGO_INCHEON_2022.RSTR_INFO/DATAGO_INCHEON_2025.RSTR_INFO_KOREAN.csv";
@@ -144,6 +147,15 @@ async function writeJsonAtomic(path, value) {
   await rename(temporaryPath, path);
 }
 
+async function readJson(path, fallback) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") return fallback;
+    throw error;
+  }
+}
+
 async function main() {
   const restaurantArchive = readArgument("restaurants-zip");
   const menuWorkbook = readArgument("menus-xlsx");
@@ -193,7 +205,15 @@ async function main() {
     },
   );
 
-  const restaurants = adaptIncheonRows(restaurantRows, menuRows);
+  const dataPath = resolve(readArgument("data", DEFAULT_DATA_PATH));
+  const preserveKakao = readArgument("preserve-kakao", "true") !== "false";
+  const existingRestaurants = preserveKakao
+    ? await readJson(dataPath, [])
+    : [];
+  const restaurants = preserveKakaoPlaces(
+    adaptIncheonRows(restaurantRows, menuRows),
+    existingRestaurants,
+  );
   if (restaurantRows.length < 1_000 || menuRows.length < 1_000) {
     throw new Error("공식 파일의 행 수가 예상보다 적어 결과를 저장하지 않았습니다.");
   }
@@ -201,7 +221,6 @@ async function main() {
     throw new Error("앱용 인천 식당이 한 곳도 없어 결과를 저장하지 않았습니다.");
   }
 
-  const dataPath = resolve(readArgument("data", DEFAULT_DATA_PATH));
   await writeJsonAtomic(dataPath, restaurants);
   console.log(
     `완료: 매장 ${restaurantRows.length.toLocaleString("ko-KR")}건 + 메뉴 ${menuRows.length.toLocaleString("ko-KR")}건 → 앱용 ${restaurants.length.toLocaleString("ko-KR")}건`,

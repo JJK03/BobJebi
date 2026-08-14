@@ -186,6 +186,29 @@ export function adaptIncheonRows(restaurantRows, menuRows) {
   return restaurants;
 }
 
+export function preserveKakaoPlaces(restaurants, existingRestaurants) {
+  const existingById = new Map(
+    existingRestaurants.map((restaurant) => [restaurant.id, restaurant]),
+  );
+
+  return restaurants.map((restaurant) => {
+    const existing = existingById.get(restaurant.id);
+    if (!existing?.kakaoPlaceId && !existing?.kakaoPlaceUrl) {
+      return restaurant;
+    }
+
+    return {
+      ...restaurant,
+      ...(existing.kakaoPlaceId
+        ? { kakaoPlaceId: existing.kakaoPlaceId }
+        : {}),
+      ...(existing.kakaoPlaceUrl
+        ? { kakaoPlaceUrl: existing.kakaoPlaceUrl }
+        : {}),
+    };
+  });
+}
+
 async function fetchJson(url, retries = 3) {
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     const response = await fetch(url);
@@ -292,7 +315,10 @@ async function main() {
     "매장 기본정보",
   );
   const menuRows = await fetchAllPages(MENU_PATH, serviceKey, "메뉴정보");
-  const restaurants = adaptIncheonRows(restaurantRows, menuRows);
+  const restaurants = preserveKakaoPlaces(
+    adaptIncheonRows(restaurantRows, menuRows),
+    existingRestaurants,
+  );
 
   const minimumSafeCount = Math.floor(existingRestaurants.length * 0.5);
   if (existingRestaurants.length > 0 && restaurants.length < minimumSafeCount) {
