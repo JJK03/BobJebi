@@ -34,7 +34,7 @@ VITE_KAKAO_JAVASCRIPT_KEY=발급받은_JavaScript_키
 
 ```text
 http://localhost:5173
-https://randommenurecs.vercel.app
+https://bobjebi.vercel.app
 ```
 
 Vercel 프로젝트의 `Settings → Environment Variables`에도 `VITE_KAKAO_JAVASCRIPT_KEY`를 추가하고 Production에 적용한 뒤 다시 배포합니다. 이 키는 브라우저에서 사용하는 공개 키이므로 REST API 키를 대신 입력하면 안 됩니다.
