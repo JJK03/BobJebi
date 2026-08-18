@@ -196,6 +196,43 @@ describe('isCafeRestaurant', () => {
     expect(isCafeRestaurant(brunchCafe)).toBe(false)
   })
 
+  it('카페 메뉴가 압도적인 더수다는 브런치 일부가 있어도 카페로 판별한다', () => {
+    const cafe: Restaurant = {
+      ...restaurants[0],
+      id: 'incheon-170210',
+      name: '더수다',
+      category: '중식',
+      menus: [
+        { name: '아메리카노', price: 2_500 },
+        { name: '카페라떼', price: 3_400 },
+        { name: '카푸치노', price: 3_400 },
+        { name: '허브티', price: 3_900 },
+        { name: '카페모카', price: 4_200 },
+        { name: '스무디', price: 5_400 },
+        { name: '샌드위치', price: 8_900 },
+        { name: '수다브런치A', price: 9_800 },
+      ],
+    }
+
+    expect(isCafeRestaurant(cafe)).toBe(true)
+  })
+
+  it('상호가 명백한 식당이면 음료 비율만으로 카페에서 제외하지 않는다', () => {
+    const restaurant: Restaurant = {
+      ...restaurants[0],
+      id: 'meal-business-with-drinks',
+      name: '송도국수식당',
+      menus: [
+        { name: '아메리카노', price: 2_500 },
+        { name: '카페라떼', price: 3_400 },
+        { name: '허브티', price: 3_900 },
+        { name: '잔치국수', price: 7_000 },
+      ],
+    }
+
+    expect(isCafeRestaurant(restaurant)).toBe(false)
+  })
+
   it('베이커리와 제과점은 카페로 분류하지 않는다', () => {
     const bakery: Restaurant = {
       ...restaurants[0],

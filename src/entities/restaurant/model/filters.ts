@@ -151,11 +151,30 @@ export function isCafeRestaurant(restaurant: Restaurant): boolean {
     return false
   }
 
+  const normalizedMenuNames = restaurant.menus.map((menu) =>
+    normalizeMenuName(menu.name),
+  )
+  const cafeMenuCount = normalizedMenuNames.filter((name) =>
+    CAFE_MENU_PATTERN.test(name),
+  ).length
+  const substantialMealCount = normalizedMenuNames.filter((name) =>
+    SUBSTANTIAL_MEAL_PATTERN.test(name),
+  ).length
+  const menuCount = normalizedMenuNames.length
+  const hasSubstantialBusinessName =
+    SUBSTANTIAL_BUSINESS_NAME_PATTERN.test(restaurantName)
+  const isCafeDominant =
+    !hasSubstantialBusinessName &&
+    menuCount > 0 &&
+    cafeMenuCount / menuCount >= 0.5 &&
+    substantialMealCount / menuCount <= 0.25
+
+  if (isCafeDominant) {
+    return true
+  }
+
   const hasSubstantialMeal =
-    SUBSTANTIAL_BUSINESS_NAME_PATTERN.test(restaurantName) ||
-    restaurant.menus.some((menu) =>
-      SUBSTANTIAL_MEAL_PATTERN.test(normalizeMenuName(menu.name)),
-    )
+    hasSubstantialBusinessName || substantialMealCount > 0
   if (hasSubstantialMeal) {
     return false
   }
@@ -164,14 +183,7 @@ export function isCafeRestaurant(restaurant: Restaurant): boolean {
     return true
   }
 
-  const cafeMenuCount = restaurant.menus.filter((menu) =>
-    CAFE_MENU_PATTERN.test(normalizeMenuName(menu.name)),
-  ).length
-
-  return (
-    restaurant.menus.length > 0 &&
-    cafeMenuCount / restaurant.menus.length >= 0.5
-  )
+  return menuCount > 0 && cafeMenuCount / menuCount >= 0.5
 }
 
 export function isNonRestaurantBusiness(restaurant: Restaurant): boolean {
