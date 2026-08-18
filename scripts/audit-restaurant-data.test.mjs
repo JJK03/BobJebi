@@ -130,6 +130,8 @@ describe("데이터셋 감사", () => {
       kakaoLegacyPlaceIdRestaurants: 1,
       kakaoCheckedUnverifiedRestaurants: 0,
       kakaoUncheckedRestaurants: 2,
+      verifiedCandidateRestaurants: 1,
+      verifiedCandidateDuplicatesRemoved: 0,
       duplicateKakaoPlaceGroups: 1,
       duplicateNameAddressGroups: 1,
       deduplicatedRestaurants: 2,

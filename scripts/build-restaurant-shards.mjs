@@ -1,12 +1,17 @@
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { deduplicateRestaurants } from "./deduplicate-restaurants.mjs";
+import {
+  deduplicateRestaurants,
+  isStrictlyKakaoConfirmed,
+} from "./deduplicate-restaurants.mjs";
 
 const CELL_SIZE_DEGREES = 0.25;
 const LATITUDE_OFFSET = 0.2;
 const LONGITUDE_OFFSET = 0.2;
 const SHARD_ROOT = resolve("public/data/shards");
+const DEFAULT_VERIFICATION_POLICY = "confirmed-only";
+const MINIMUM_CONFIRMED_COVERAGE_RATIO = 0.2;
 
 const DATASETS = {
   "good-price": {
@@ -78,7 +83,35 @@ export function createTileKey(latitude, longitude) {
   return `${latitudeIndex}_${longitudeIndex}`;
 }
 
-export async function buildRestaurantShards(source) {
+export function selectRestaurantsForBuild(
+  restaurants,
+  verificationPolicy,
+  minimumConfirmedCoverageRatio = MINIMUM_CONFIRMED_COVERAGE_RATIO,
+) {
+  if (verificationPolicy === "all") {
+    return restaurants;
+  }
+  if (verificationPolicy !== "confirmed-only") {
+    throw new Error(
+      `지원하지 않는 카카오 검증 정책입니다: ${verificationPolicy}`,
+    );
+  }
+
+  const confirmedRestaurants = restaurants.filter(isStrictlyKakaoConfirmed);
+  const confirmedCoverageRatio =
+    restaurants.length === 0
+      ? 1
+      : confirmedRestaurants.length / restaurants.length;
+  if (confirmedCoverageRatio < minimumConfirmedCoverageRatio) {
+    throw new Error(
+      `카카오 엄격 확인률이 ${(confirmedCoverageRatio * 100).toFixed(1)}%로 안전 기준 ${(minimumConfirmedCoverageRatio * 100).toFixed(0)}%보다 낮습니다. 전체 재검증 후 다시 빌드해 주세요.`,
+    );
+  }
+
+  return confirmedRestaurants;
+}
+
+export async function buildRestaurantShards(source, options = {}) {
   const config = DATASETS[source];
   if (!config) {
     throw new Error(`지원하지 않는 식당 데이터 소스입니다: ${source}`);
@@ -94,7 +127,13 @@ export async function buildRestaurantShards(source) {
   ) {
     throw new Error(`${source} 식당 데이터의 좌표 형식이 올바르지 않습니다.`);
   }
-  const deduplication = deduplicateRestaurants(sourceRestaurants);
+  const verificationPolicy =
+    options.verificationPolicy ?? DEFAULT_VERIFICATION_POLICY;
+  const eligibleRestaurants = selectRestaurantsForBuild(
+    sourceRestaurants,
+    verificationPolicy,
+  );
+  const deduplication = deduplicateRestaurants(eligibleRestaurants);
   const restaurants = deduplication.restaurants;
 
   const tiles = new Map();
@@ -138,6 +177,8 @@ export async function buildRestaurantShards(source) {
       source,
       totalCount: restaurants.length,
       sourceTotalCount: sourceRestaurants.length,
+      verificationPolicy,
+      verificationEligibleCount: eligibleRestaurants.length,
       deduplicatedCount: deduplication.removedCount,
       duplicateGroupCount: deduplication.groups.length,
       cellSizeDegrees: CELL_SIZE_DEGREES,
@@ -160,6 +201,11 @@ export async function buildRestaurantShards(source) {
     console.log(
       `${source}: 식당 ${restaurants.length.toLocaleString("ko-KR")}곳을 ${tiles.size.toLocaleString("ko-KR")}개 위치 조각으로 생성했습니다.`,
     );
+    if (verificationPolicy === "confirmed-only") {
+      console.log(
+        `${source}: 카카오 엄격 확인 후보 ${eligibleRestaurants.length.toLocaleString("ko-KR")}곳만 포함했습니다.`,
+      );
+    }
     if (deduplication.removedCount > 0) {
       console.log(
         `${source}: 중복 ${deduplication.groups.length.toLocaleString("ko-KR")}그룹에서 ${deduplication.removedCount.toLocaleString("ko-KR")}건을 병합했습니다.`,
@@ -173,9 +219,13 @@ export async function buildRestaurantShards(source) {
 
 async function main() {
   const selectedSource = readArgument("source");
+  const verificationPolicy = readArgument(
+    "verification",
+    DEFAULT_VERIFICATION_POLICY,
+  );
   const sources = selectedSource ? [selectedSource] : Object.keys(DATASETS);
   for (const source of sources) {
-    await buildRestaurantShards(source);
+    await buildRestaurantShards(source, { verificationPolicy });
   }
 }
 

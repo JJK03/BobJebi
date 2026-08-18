@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
   deduplicateRestaurants,
+  isStrictlyKakaoConfirmed,
   normalizeRestaurantAddress,
   normalizeRestaurantName,
 } from "./deduplicate-restaurants.mjs";
@@ -233,6 +234,9 @@ export function auditRestaurantDataset(
     return name && address ? `${name}|${address}` : "";
   });
   const deduplication = deduplicateRestaurants(restaurants);
+  const verifiedDeduplication = deduplicateRestaurants(
+    restaurants.filter(isStrictlyKakaoConfirmed),
+  );
   const suspectedSideMenus = [];
   const categoryReviewCandidates = [];
 
@@ -283,6 +287,9 @@ export function auditRestaurantDataset(
         restaurants.length === 0
           ? 0
           : Number(((kakaoConfirmedCount / restaurants.length) * 100).toFixed(1)),
+      verifiedCandidateRestaurants:
+        verifiedDeduplication.restaurants.length,
+      verifiedCandidateDuplicatesRemoved: verifiedDeduplication.removedCount,
       kakaoLegacyPlaceIdRestaurants: kakaoLegacyPlaceIdCount,
       kakaoCheckedUnverifiedRestaurants: kakaoCheckedUnverifiedCount,
       kakaoUncheckedRestaurants: kakaoUncheckedCount,
@@ -352,6 +359,9 @@ function printDatasetSummary(dataset) {
   );
   console.log(
     `기존 기준 ID: ${summary.kakaoLegacyPlaceIdRestaurants.toLocaleString("ko-KR")}곳 · 검사 후 미확인 ${summary.kakaoCheckedUnverifiedRestaurants.toLocaleString("ko-KR")}곳 · 미검사 ${summary.kakaoUncheckedRestaurants.toLocaleString("ko-KR")}곳`,
+  );
+  console.log(
+    `검증 후보 전용 shard 예상: ${summary.verifiedCandidateRestaurants.toLocaleString("ko-KR")}곳 · 확인 후보 중 중복 ${summary.verifiedCandidateDuplicatesRemoved.toLocaleString("ko-KR")}건 병합`,
   );
   console.log(
     `카카오 ID 중복: ${summary.duplicateKakaoPlaceGroups.toLocaleString("ko-KR")}그룹 / ${summary.duplicateKakaoPlaceRecords.toLocaleString("ko-KR")}건`,
