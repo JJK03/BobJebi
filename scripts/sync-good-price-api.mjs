@@ -2,6 +2,11 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  createDataUpdateReport,
+  printDataUpdateReportSummary,
+  writeDataUpdateReport,
+} from "./data-update-report.mjs";
 import { selectKakaoPlaceMatch } from "./enrich-kakao-places.mjs";
 
 const DEFAULT_DATA_PATH = "public/data/restaurants.json";
@@ -431,8 +436,23 @@ async function main() {
     );
   }
 
+  const updateReport = createDataUpdateReport({
+    source: "good-price",
+    previousRestaurants: existingRestaurants,
+    nextRestaurants: restaurants,
+    input: {
+      origin: "public-data-api",
+      fetchedRestaurantRows: rows.length,
+      normalizedRestaurants: sources.length,
+      preservedLocations: preservedCount,
+      newlyGeocoded: geocodedCount,
+      excludedDuringTransform: skippedCount,
+    },
+  });
+
   await writeJsonAtomic(dataPath, restaurants);
   await writeJsonAtomic(cachePath, geocodingCache);
+  const reportPaths = await writeDataUpdateReport(updateReport);
 
   console.log(
     `완료: API ${rows.length.toLocaleString("ko-KR")}건 → 앱용 ${restaurants.length.toLocaleString("ko-KR")}건`,
@@ -440,6 +460,7 @@ async function main() {
   console.log(
     `기존 좌표 보존 ${preservedCount.toLocaleString("ko-KR")}건 · 신규 지오코딩 ${geocodedCount.toLocaleString("ko-KR")}건 · 좌표 없어 제외 ${skippedCount.toLocaleString("ko-KR")}건`,
   );
+  printDataUpdateReportSummary(updateReport, reportPaths);
 }
 
 const isDirectExecution =

@@ -3,6 +3,11 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
+  createDataUpdateReport,
+  printDataUpdateReportSummary,
+  writeDataUpdateReport,
+} from "./data-update-report.mjs";
+import {
   adaptIncheonRows,
   preserveKakaoPlaces,
 } from "./sync-incheon-food-api.mjs";
@@ -207,12 +212,11 @@ async function main() {
 
   const dataPath = resolve(readArgument("data", DEFAULT_DATA_PATH));
   const preserveKakao = readArgument("preserve-kakao", "true") !== "false";
-  const existingRestaurants = preserveKakao
-    ? await readJson(dataPath, [])
-    : [];
+  const existingRestaurants = await readJson(dataPath, []);
+  const adaptedRestaurants = adaptIncheonRows(restaurantRows, menuRows);
   const restaurants = preserveKakaoPlaces(
-    adaptIncheonRows(restaurantRows, menuRows),
-    existingRestaurants,
+    adaptedRestaurants,
+    preserveKakao ? existingRestaurants : [],
   );
   if (restaurantRows.length < 1_000 || menuRows.length < 1_000) {
     throw new Error("공식 파일의 행 수가 예상보다 적어 결과를 저장하지 않았습니다.");
@@ -221,10 +225,29 @@ async function main() {
     throw new Error("앱용 인천 식당이 한 곳도 없어 결과를 저장하지 않았습니다.");
   }
 
+  const updateReport = createDataUpdateReport({
+    source: "incheon-smart-food",
+    previousRestaurants: existingRestaurants,
+    nextRestaurants: restaurants,
+    input: {
+      origin: "official-files",
+      fetchedRestaurantRows: restaurantRows.length,
+      fetchedMenuRows: menuRows.length,
+      normalizedRestaurants: adaptedRestaurants.length,
+      excludedDuringTransform: Math.max(
+        0,
+        restaurantRows.length - adaptedRestaurants.length,
+      ),
+      preservedKakaoPlaces: preserveKakao,
+    },
+  });
+
   await writeJsonAtomic(dataPath, restaurants);
+  const reportPaths = await writeDataUpdateReport(updateReport);
   console.log(
     `완료: 매장 ${restaurantRows.length.toLocaleString("ko-KR")}건 + 메뉴 ${menuRows.length.toLocaleString("ko-KR")}건 → 앱용 ${restaurants.length.toLocaleString("ko-KR")}건`,
   );
+  printDataUpdateReportSummary(updateReport, reportPaths);
 }
 
 const isDirectExecution =

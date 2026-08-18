@@ -1,6 +1,11 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  createDataUpdateReport,
+  printDataUpdateReportSummary,
+  writeDataUpdateReport,
+} from "./data-update-report.mjs";
 import { normalizeText, parsePrice } from "./sync-good-price-api.mjs";
 
 const API_BASE_URL = "https://incheon.openapi.redtable.global";
@@ -322,8 +327,9 @@ async function main() {
     "매장 기본정보",
   );
   const menuRows = await fetchAllPages(MENU_PATH, serviceKey, "메뉴정보");
+  const adaptedRestaurants = adaptIncheonRows(restaurantRows, menuRows);
   const restaurants = preserveKakaoPlaces(
-    adaptIncheonRows(restaurantRows, menuRows),
+    adaptedRestaurants,
     existingRestaurants,
   );
 
@@ -339,10 +345,28 @@ async function main() {
     );
   }
 
+  const updateReport = createDataUpdateReport({
+    source: "incheon-smart-food",
+    previousRestaurants: existingRestaurants,
+    nextRestaurants: restaurants,
+    input: {
+      origin: "incheon-api",
+      fetchedRestaurantRows: restaurantRows.length,
+      fetchedMenuRows: menuRows.length,
+      normalizedRestaurants: adaptedRestaurants.length,
+      excludedDuringTransform: Math.max(
+        0,
+        restaurantRows.length - adaptedRestaurants.length,
+      ),
+    },
+  });
+
   await writeJsonAtomic(dataPath, restaurants);
+  const reportPaths = await writeDataUpdateReport(updateReport);
   console.log(
     `완료: 매장 ${restaurantRows.length.toLocaleString("ko-KR")}건 + 메뉴 ${menuRows.length.toLocaleString("ko-KR")}건 → 앱용 ${restaurants.length.toLocaleString("ko-KR")}건`,
   );
+  printDataUpdateReportSummary(updateReport, reportPaths);
 }
 
 const isDirectExecution =
