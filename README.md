@@ -54,7 +54,7 @@ npm run build
 
 ## 개발 문서
 
-프로젝트 구조, 핵심 로직, 환경변수, 데이터 갱신, 배포와 장애 대응은 **[밥제비 개발 문서](https://app.notion.com/p/3c09b106d5f281c59cbedc15f8eab751?source=copy_link)**에서 관리합니다.
+프로젝트 구조, 핵심 로직, 환경변수, 데이터 갱신, 배포와 장애 대응은 [밥제비 개발 문서](https://app.notion.com/p/3c09b106d5f281c59cbedc15f8eab751?source=copy_link)에서 관리합니다.
 
 ## 기술 구성
 
