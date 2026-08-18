@@ -5,6 +5,7 @@ import {
   formatNaverCrossCheckMarkdown,
   normalizeNaverAddress,
   parseNaverCoordinate,
+  selectCandidatesByIds,
   selectEvenlySpacedCandidates,
   selectNaverLocalMatch,
   stripNaverMarkup,
@@ -102,6 +103,14 @@ describe("교차 검증 표본과 보고서", () => {
       3,
     );
     expect(selected.map(({ id }) => id)).toEqual([0, 5, 9]);
+  });
+
+  it("지정한 ID의 후보만 원본 순서대로 선택한다", () => {
+    const selected = selectCandidatesByIds(
+      [{ id: "a" }, { id: "b" }, { id: "c" }],
+      ["c", "a"],
+    );
+    expect(selected.map(({ id }) => id)).toEqual(["a", "c"]);
   });
 
   it("동일 주소와 좌표에서 상호명만 달라진 후보를 별도 집계한다", () => {

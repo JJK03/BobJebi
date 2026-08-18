@@ -193,6 +193,13 @@ export function selectEvenlySpacedCandidates(restaurants, limit) {
   );
 }
 
+export function selectCandidatesByIds(restaurants, ids) {
+  const requestedIds = new Set(ids.map(String));
+  return restaurants.filter((restaurant) =>
+    requestedIds.has(String(restaurant.id)),
+  );
+}
+
 export function buildSearchQueries(restaurant) {
   return [
     [restaurant.name, restaurant.province].filter(Boolean).join(" "),
@@ -386,6 +393,16 @@ async function main() {
   if (!Number.isFinite(delayMilliseconds) || delayMilliseconds < 0) {
     throw new Error("--delay는 0 이상의 숫자여야 합니다.");
   }
+  const requestedIds = readArgument("ids")
+    .split(",")
+    .map((id) => id.trim())
+    .filter((id, index, ids) => id && ids.indexOf(id) === index);
+  if (requestedIds.length > MAX_LIMIT_PER_SOURCE) {
+    throw new Error(`--ids는 최대 ${MAX_LIMIT_PER_SOURCE}개까지 지정할 수 있습니다.`);
+  }
+  if (requestedIds.length > 0 && sourceKeys.length !== 1) {
+    throw new Error("--ids를 사용할 때는 --source도 하나만 지정해야 합니다.");
+  }
 
   const sources = [];
   let requestCount = 0;
@@ -397,10 +414,20 @@ async function main() {
     const eligible = restaurants.filter(
       (restaurant) => !isStrictlyKakaoConfirmed(restaurant),
     );
-    const selected = selectEvenlySpacedCandidates(
-      eligible,
-      Math.min(limitPerSource, eligible.length),
-    );
+    const selected =
+      requestedIds.length > 0
+        ? selectCandidatesByIds(eligible, requestedIds)
+        : selectEvenlySpacedCandidates(
+            eligible,
+            Math.min(limitPerSource, eligible.length),
+          );
+    if (requestedIds.length > 0 && selected.length !== requestedIds.length) {
+      const selectedIds = new Set(selected.map(({ id }) => String(id)));
+      const missingIds = requestedIds.filter((id) => !selectedIds.has(id));
+      throw new Error(
+        `카카오 미확인 후보에서 찾지 못한 ID: ${missingIds.join(", ")}`,
+      );
+    }
     const samples = [];
 
     for (const [index, restaurant] of selected.entries()) {
