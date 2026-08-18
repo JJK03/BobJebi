@@ -116,4 +116,56 @@ describe('위치 기반 식당 데이터 로딩', () => {
       ),
     ).rejects.toThrow('식당 위치 조각의 데이터 형식이 올바르지 않습니다.')
   })
+
+  it('근거가 있는 카카오 확인 상태를 포함한 식당을 읽는다', async () => {
+    const verifiedRestaurant: Restaurant = {
+      ...restaurant,
+      kakaoPlaceId: '123',
+      placeVerification: {
+        provider: 'kakao',
+        status: 'confirmed',
+        matchedBy: 'name-address',
+        distanceMeters: 24,
+        checkedAt: '2026-08-18T00:00:00.000Z',
+      },
+    }
+    const selectedManifest: RestaurantManifest = {
+      ...manifest,
+      tiles: { '148_505': manifest.tiles['148_505'] },
+    }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([verifiedRestaurant])))
+
+    await expect(
+      loadNearbyRestaurants(
+        selectedManifest,
+        { latitude: 37.39, longitude: 126.64 },
+        2_000,
+      ),
+    ).resolves.toEqual([verifiedRestaurant])
+  })
+
+  it('확인 근거가 빠진 카카오 확인 상태는 거부한다', async () => {
+    const invalidRestaurant = {
+      ...restaurant,
+      kakaoPlaceId: '123',
+      placeVerification: {
+        provider: 'kakao',
+        status: 'confirmed',
+        checkedAt: '2026-08-18T00:00:00.000Z',
+      },
+    }
+    const selectedManifest: RestaurantManifest = {
+      ...manifest,
+      tiles: { '148_505': manifest.tiles['148_505'] },
+    }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([invalidRestaurant])))
+
+    await expect(
+      loadNearbyRestaurants(
+        selectedManifest,
+        { latitude: 37.39, longitude: 126.64 },
+        2_000,
+      ),
+    ).rejects.toThrow('식당 위치 조각의 데이터 형식이 올바르지 않습니다.')
+  })
 })

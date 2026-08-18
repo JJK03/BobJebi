@@ -38,6 +38,19 @@ export interface Menu {
   price: number
 }
 
+export type PlaceVerificationStatus = 'confirmed' | 'unverified'
+export type PlaceVerificationMatchedBy =
+  | 'name-address'
+  | 'name-coordinates'
+
+export interface PlaceVerification {
+  provider: 'kakao'
+  status: PlaceVerificationStatus
+  matchedBy?: PlaceVerificationMatchedBy
+  distanceMeters?: number
+  checkedAt: string
+}
+
 export interface Restaurant extends Coordinates {
   id: string
   name: string
@@ -49,4 +62,5 @@ export interface Restaurant extends Coordinates {
   menus: Menu[]
   kakaoPlaceId?: string
   kakaoPlaceUrl?: string
+  placeVerification?: PlaceVerification
 }

@@ -8,6 +8,7 @@ const DEFAULT_PROGRESS_PATH = ".cache/kakao-place-progress.json";
 const MAX_MATCH_DISTANCE_METERS = 500;
 const MAX_NAME_ONLY_DISTANCE_METERS = 150;
 const CHECKPOINT_INTERVAL = 50;
+const MATCH_POLICY_VERSION = 2;
 
 const wait = (milliseconds) =>
   new Promise((resolveWait) => setTimeout(resolveWait, milliseconds));
@@ -28,7 +29,7 @@ export function normalizePlaceAddress(address) {
     .replace(/[^0-9a-z가-힣]/g, "");
 }
 
-export function selectKakaoPlace(
+export function selectKakaoPlaceMatch(
   documents,
   restaurant,
   maxDistanceMeters = MAX_MATCH_DISTANCE_METERS,
@@ -56,15 +57,29 @@ export function selectKakaoPlace(
       ({ distance, exactName, exactAddress, isFoodOrCafe }) =>
         Number.isFinite(distance) &&
         distance <= maxDistanceMeters &&
-        ((exactName && distance <= MAX_NAME_ONLY_DISTANCE_METERS) ||
-          (exactAddress && isFoodOrCafe)),
+        exactName &&
+        isFoodOrCafe &&
+        (exactAddress || distance <= MAX_NAME_ONLY_DISTANCE_METERS),
     )
     .sort((left, right) => {
-      if (left.exactName !== right.exactName) {
-        return left.exactName ? -1 : 1;
+      if (left.exactAddress !== right.exactAddress) {
+        return left.exactAddress ? -1 : 1;
       }
       return left.distance - right.distance;
-    })[0]?.document;
+    })
+    .map(({ document, distance, exactAddress }) => ({
+      place: document,
+      matchedBy: exactAddress ? "name-address" : "name-coordinates",
+      distanceMeters: distance,
+    }))[0];
+}
+
+export function selectKakaoPlace(
+  documents,
+  restaurant,
+  maxDistanceMeters = MAX_MATCH_DISTANCE_METERS,
+) {
+  return selectKakaoPlaceMatch(documents, restaurant, maxDistanceMeters)?.place;
 }
 
 async function searchKakaoPlace(
@@ -101,7 +116,7 @@ async function searchKakaoPlace(
 
     if (response.ok) {
       const body = await response.json();
-      return selectKakaoPlace(body.documents ?? [], restaurant);
+      return selectKakaoPlaceMatch(body.documents ?? [], restaurant);
     }
 
     if (response.status === 401 || response.status === 403) {
@@ -179,7 +194,11 @@ async function main() {
   );
   const restaurants = await readJson(dataPath, []);
   const progress = await readJson(progressPath, { processedIds: [] });
-  const processedIds = new Set(progress.processedIds ?? []);
+  const processedIds = new Set(
+    progress.matchPolicyVersion === MATCH_POLICY_VERSION
+      ? (progress.processedIds ?? [])
+      : [],
+  );
   let processedThisRun = 0;
   let matchedThisRun = 0;
 
@@ -196,6 +215,7 @@ async function main() {
   const saveCheckpoint = async () => {
     await writeJsonAtomic(dataPath, restaurants);
     await writeJsonAtomic(progressPath, {
+      matchPolicyVersion: MATCH_POLICY_VERSION,
       processedIds: [...processedIds],
       updatedAt: new Date().toISOString(),
     });
@@ -203,17 +223,14 @@ async function main() {
 
   const pendingIndexes = restaurants
     .map((restaurant, index) => ({ restaurant, index }))
-    .filter(
-      ({ restaurant }) =>
-        !processedIds.has(restaurant.id) && !restaurant.kakaoPlaceId,
-    )
+    .filter(({ restaurant }) => !processedIds.has(restaurant.id))
     .slice(0, limit === Infinity ? undefined : limit)
     .map(({ index }) => index);
   let lastCheckpointCount = 0;
 
   for (let offset = 0; offset < pendingIndexes.length; offset += concurrency) {
     const batchIndexes = pendingIndexes.slice(offset, offset + concurrency);
-    const places = await Promise.all(
+    const matches = await Promise.all(
       batchIndexes.map((index) =>
         searchKakaoPlace(
           restaurants[index],
@@ -227,17 +244,35 @@ async function main() {
     for (let batchIndex = 0; batchIndex < batchIndexes.length; batchIndex += 1) {
       const index = batchIndexes[batchIndex];
       const restaurant = restaurants[index];
-      const place = places[batchIndex];
+      const match = matches[batchIndex];
+      const checkedAt = new Date().toISOString();
 
-      if (place) {
+      if (match) {
+        const { place } = match;
         restaurants[index] = {
           ...restaurant,
           kakaoPlaceId: place.id,
           kakaoPlaceUrl:
             place.place_url?.replace(/^http:/, "https:") ||
             `https://map.kakao.com/link/map/${place.id}`,
+          placeVerification: {
+            provider: "kakao",
+            status: "confirmed",
+            matchedBy: match.matchedBy,
+            distanceMeters: match.distanceMeters,
+            checkedAt,
+          },
         };
         matchedThisRun += 1;
+      } else {
+        restaurants[index] = {
+          ...restaurant,
+          placeVerification: {
+            provider: "kakao",
+            status: "unverified",
+            checkedAt,
+          },
+        };
       }
 
       processedIds.add(restaurant.id);

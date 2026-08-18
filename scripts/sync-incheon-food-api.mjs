@@ -193,7 +193,11 @@ export function preserveKakaoPlaces(restaurants, existingRestaurants) {
 
   return restaurants.map((restaurant) => {
     const existing = existingById.get(restaurant.id);
-    if (!existing?.kakaoPlaceId && !existing?.kakaoPlaceUrl) {
+    if (
+      !existing?.kakaoPlaceId &&
+      !existing?.kakaoPlaceUrl &&
+      !existing?.placeVerification
+    ) {
       return restaurant;
     }
 
@@ -204,6 +208,9 @@ export function preserveKakaoPlaces(restaurants, existingRestaurants) {
         : {}),
       ...(existing.kakaoPlaceUrl
         ? { kakaoPlaceUrl: existing.kakaoPlaceUrl }
+        : {}),
+      ...(existing.placeVerification
+        ? { placeVerification: existing.placeVerification }
         : {}),
     };
   });

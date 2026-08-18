@@ -120,6 +120,9 @@ function toRestaurantReference(restaurant) {
     ...(restaurant.kakaoPlaceId
       ? { kakaoPlaceId: String(restaurant.kakaoPlaceId) }
       : {}),
+    ...(restaurant.placeVerification
+      ? { placeVerification: restaurant.placeVerification }
+      : {}),
   };
 }
 
@@ -205,8 +208,26 @@ export function auditRestaurantDataset(
 
   const maxSideMenuPrice =
     options.maxSideMenuPrice ?? DEFAULT_MAX_SIDE_MENU_PRICE;
-  const kakaoConfirmedCount = restaurants.filter(
+  const kakaoPlaceIdCount = restaurants.filter(
     (restaurant) => Boolean(restaurant.kakaoPlaceId),
+  ).length;
+  const kakaoConfirmedCount = restaurants.filter(
+    (restaurant) =>
+      Boolean(restaurant.kakaoPlaceId) &&
+      restaurant.placeVerification?.provider === "kakao" &&
+      restaurant.placeVerification?.status === "confirmed",
+  ).length;
+  const kakaoLegacyPlaceIdCount = restaurants.filter(
+    (restaurant) =>
+      Boolean(restaurant.kakaoPlaceId) && !restaurant.placeVerification,
+  ).length;
+  const kakaoCheckedUnverifiedCount = restaurants.filter(
+    (restaurant) =>
+      restaurant.placeVerification?.provider === "kakao" &&
+      restaurant.placeVerification?.status === "unverified",
+  ).length;
+  const kakaoUncheckedCount = restaurants.filter(
+    (restaurant) => !restaurant.placeVerification,
   ).length;
   const duplicateKakaoPlaces = findDuplicateGroups(
     restaurants,
@@ -260,12 +281,16 @@ export function auditRestaurantDataset(
     inputPath,
     summary: {
       totalRestaurants: restaurants.length,
+      kakaoPlaceIdRestaurants: kakaoPlaceIdCount,
       kakaoConfirmedRestaurants: kakaoConfirmedCount,
       kakaoUnconfirmedRestaurants: restaurants.length - kakaoConfirmedCount,
       kakaoConfirmedRate:
         restaurants.length === 0
           ? 0
           : Number(((kakaoConfirmedCount / restaurants.length) * 100).toFixed(1)),
+      kakaoLegacyPlaceIdRestaurants: kakaoLegacyPlaceIdCount,
+      kakaoCheckedUnverifiedRestaurants: kakaoCheckedUnverifiedCount,
+      kakaoUncheckedRestaurants: kakaoUncheckedCount,
       duplicateKakaoPlaceGroups: duplicateKakaoPlaces.length,
       duplicateKakaoPlaceRecords: duplicateKakaoRecordCount,
       duplicateNameAddressGroups: duplicateNameAddresses.length,
@@ -315,7 +340,13 @@ function printDatasetSummary(dataset) {
   console.log(`\n[${DATASETS[dataset.source].label}]`);
   console.log(`전체 식당: ${summary.totalRestaurants.toLocaleString("ko-KR")}곳`);
   console.log(
-    `카카오 확인: ${summary.kakaoConfirmedRestaurants.toLocaleString("ko-KR")}곳 (${summary.kakaoConfirmedRate}%) · 미확인 ${summary.kakaoUnconfirmedRestaurants.toLocaleString("ko-KR")}곳`,
+    `카카오 장소 ID: ${summary.kakaoPlaceIdRestaurants.toLocaleString("ko-KR")}곳`,
+  );
+  console.log(
+    `엄격 기준 확인: ${summary.kakaoConfirmedRestaurants.toLocaleString("ko-KR")}곳 (${summary.kakaoConfirmedRate}%) · 확인 필요 ${summary.kakaoUnconfirmedRestaurants.toLocaleString("ko-KR")}곳`,
+  );
+  console.log(
+    `기존 기준 ID: ${summary.kakaoLegacyPlaceIdRestaurants.toLocaleString("ko-KR")}곳 · 검사 후 미확인 ${summary.kakaoCheckedUnverifiedRestaurants.toLocaleString("ko-KR")}곳 · 미검사 ${summary.kakaoUncheckedRestaurants.toLocaleString("ko-KR")}곳`,
   );
   console.log(
     `카카오 ID 중복: ${summary.duplicateKakaoPlaceGroups.toLocaleString("ko-KR")}그룹 / ${summary.duplicateKakaoPlaceRecords.toLocaleString("ko-KR")}건`,

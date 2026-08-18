@@ -3,6 +3,7 @@ import {
   normalizePlaceAddress,
   normalizePlaceName,
   selectKakaoPlace,
+  selectKakaoPlaceMatch,
 } from "./enrich-kakao-places.mjs";
 
 describe("normalizePlaceName", () => {
@@ -19,48 +20,51 @@ describe("normalizePlaceAddress", () => {
   });
 });
 
-describe("selectKakaoPlace", () => {
+describe("selectKakaoPlaceMatch", () => {
   const restaurant = {
     name: "행복식당",
     address: "인천광역시 연수구 행복로 1",
   };
 
-  it("이름이 같고 150m 안에서 가장 가까운 장소를 선택한다", () => {
-    const selected = selectKakaoPlace(
+  it("상호명이 같고 음식점이면서 150m 안인 가장 가까운 장소를 선택한다", () => {
+    const selected = selectKakaoPlaceMatch(
       [
-        { id: "far", place_name: "행복식당", distance: "120" },
-        { id: "near", place_name: "행복 식당", distance: "35" },
-        { id: "wrong", place_name: "행복분식", distance: "5" },
+        {
+          id: "far",
+          place_name: "행복식당",
+          distance: "120",
+          category_group_code: "FD6",
+        },
+        {
+          id: "near",
+          place_name: "행복 식당",
+          distance: "35",
+          category_group_code: "FD6",
+        },
+        {
+          id: "wrong",
+          place_name: "행복분식",
+          distance: "5",
+          category_group_code: "FD6",
+        },
       ],
       restaurant,
     );
 
-    expect(selected?.id).toBe("near");
+    expect(selected).toMatchObject({
+      place: { id: "near" },
+      matchedBy: "name-coordinates",
+      distanceMeters: 35,
+    });
   });
 
-  it("이름만 같고 150m보다 멀면 다른 지점일 수 있어 선택하지 않는다", () => {
-    expect(
-      selectKakaoPlace(
-        [{ id: "other-branch", place_name: "행복식당", distance: "151" }],
-        restaurant,
-      ),
-    ).toBeUndefined();
-  });
-
-  it("카카오 지점명이 달라도 음식점이고 주소가 같으면 선택한다", () => {
-    const selected = selectKakaoPlace(
+  it("상호명과 주소가 모두 같으면 150m 밖에서도 최대 범위 안의 장소를 선택한다", () => {
+    const selected = selectKakaoPlaceMatch(
       [
         {
-          id: "parking",
-          place_name: "행복식당 주차장",
-          distance: "3",
-          category_group_code: "PK6",
-          road_address_name: "인천 연수구 행복로 1",
-        },
-        {
-          id: "branch",
-          place_name: "행복식당 연수점",
-          distance: "8",
+          id: "same-address",
+          place_name: "행복식당",
+          distance: "320",
           category_group_code: "FD6",
           road_address_name: "인천 연수구 행복로 1",
         },
@@ -68,16 +72,37 @@ describe("selectKakaoPlace", () => {
       restaurant,
     );
 
-    expect(selected?.id).toBe("branch");
+    expect(selected).toMatchObject({
+      place: { id: "same-address" },
+      matchedBy: "name-address",
+      distanceMeters: 320,
+    });
   });
 
-  it("이름이 달라도 주소가 같은 음식점이 아니면 선택하지 않는다", () => {
+  it("주소가 같은 음식점이어도 상호명이 다르면 선택하지 않는다", () => {
     expect(
-      selectKakaoPlace(
+      selectKakaoPlaceMatch(
+        [
+          {
+            id: "other-branch",
+            place_name: "행복식당 연수점",
+            distance: "8",
+            category_group_code: "FD6",
+            road_address_name: "인천 연수구 행복로 1",
+          },
+        ],
+        restaurant,
+      ),
+    ).toBeUndefined();
+  });
+
+  it("상호명이 같아도 음식점이나 카페가 아니면 선택하지 않는다", () => {
+    expect(
+      selectKakaoPlaceMatch(
         [
           {
             id: "parking",
-            place_name: "행복식당 주차장",
+            place_name: "행복식당",
             distance: "3",
             category_group_code: "PK6",
             road_address_name: "인천 연수구 행복로 1",
@@ -88,15 +113,54 @@ describe("selectKakaoPlace", () => {
     ).toBeUndefined();
   });
 
-  it("이름이 다르거나 너무 먼 장소는 연결하지 않는다", () => {
+  it("상호명만 같고 150m보다 멀면 다른 지점일 수 있어 선택하지 않는다", () => {
     expect(
-      selectKakaoPlace(
+      selectKakaoPlaceMatch(
         [
-          { id: "wrong", place_name: "행복분식", distance: "10" },
-          { id: "far", place_name: "행복식당", distance: "700" },
+          {
+            id: "far-branch",
+            place_name: "행복식당",
+            distance: "151",
+            category_group_code: "FD6",
+          },
         ],
         restaurant,
       ),
     ).toBeUndefined();
+  });
+
+  it("최대 검색 범위를 벗어난 장소는 주소가 같아도 선택하지 않는다", () => {
+    expect(
+      selectKakaoPlaceMatch(
+        [
+          {
+            id: "too-far",
+            place_name: "행복식당",
+            distance: "501",
+            category_group_code: "FD6",
+            road_address_name: "인천 연수구 행복로 1",
+          },
+        ],
+        restaurant,
+      ),
+    ).toBeUndefined();
+  });
+});
+
+describe("selectKakaoPlace", () => {
+  it("기존 호출부를 위해 선택된 카카오 문서만 반환한다", () => {
+    expect(
+      selectKakaoPlace(
+        [
+          {
+            id: "place",
+            place_name: "행복식당",
+            distance: "20",
+            category_group_code: "FD6",
+          },
+        ],
+        { name: "행복식당", address: "인천 연수구 행복로 1" },
+      ),
+    ).toMatchObject({ id: "place" });
   });
 });

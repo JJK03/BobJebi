@@ -3,6 +3,7 @@ import {
   adaptGoodPriceRow,
   createExistingLookup,
   findExistingRestaurant,
+  mergeWithLocation,
   normalizeCategory,
   parsePrice,
 } from "./sync-good-price-api.mjs";
@@ -67,5 +68,42 @@ describe("착한가격업소 API 변환", () => {
         address: "인천광역시 연수구 테스트로 1번길",
       }),
     ).toBe(existing);
+  });
+
+  it("데이터 갱신 시 기존 카카오 검증 근거를 보존한다", () => {
+    const verification = {
+      provider: "kakao",
+      status: "confirmed",
+      matchedBy: "name-coordinates",
+      distanceMeters: 18,
+      checkedAt: "2026-08-18T00:00:00.000Z",
+    };
+    const existing = {
+      id: "existing-id",
+      latitude: 37.1,
+      longitude: 126.1,
+      kakaoPlaceId: "123",
+      kakaoPlaceUrl: "https://place.map.kakao.com/123",
+      placeVerification: verification,
+    };
+
+    expect(
+      mergeWithLocation(
+        {
+          province: "인천광역시",
+          district: "연수구",
+          name: "테스트반점",
+          address: "인천광역시 연수구 테스트로 1",
+          category: "중식",
+          menus: [{ name: "짜장면", price: 6_000 }],
+        },
+        existing,
+        existing,
+      ),
+    ).toMatchObject({
+      id: "existing-id",
+      kakaoPlaceId: "123",
+      placeVerification: verification,
+    });
   });
 });

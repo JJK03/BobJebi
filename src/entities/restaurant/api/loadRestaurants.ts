@@ -33,6 +33,29 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
+function isPlaceVerification(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  const isConfirmed = value.status === 'confirmed'
+  const hasValidMatchEvidence =
+    value.matchedBy === 'name-address' ||
+    value.matchedBy === 'name-coordinates'
+
+  return (
+    value.provider === 'kakao' &&
+    (isConfirmed || value.status === 'unverified') &&
+    typeof value.checkedAt === 'string' &&
+    (!isConfirmed || hasValidMatchEvidence) &&
+    (value.matchedBy === undefined || hasValidMatchEvidence) &&
+    (value.distanceMeters === undefined ||
+      (typeof value.distanceMeters === 'number' &&
+        Number.isFinite(value.distanceMeters) &&
+        value.distanceMeters >= 0))
+  )
+}
+
 function isRestaurant(value: unknown): value is Restaurant {
   if (!isRecord(value) || !Array.isArray(value.menus)) {
     return false
@@ -52,6 +75,8 @@ function isRestaurant(value: unknown): value is Restaurant {
       typeof value.kakaoPlaceId === 'string') &&
     (value.kakaoPlaceUrl === undefined ||
       typeof value.kakaoPlaceUrl === 'string') &&
+    (value.placeVerification === undefined ||
+      isPlaceVerification(value.placeVerification)) &&
     value.menus.length > 0 &&
     value.menus.every(
       (menu) =>

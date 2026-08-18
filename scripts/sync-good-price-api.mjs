@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { selectKakaoPlaceMatch } from "./enrich-kakao-places.mjs";
 
 const DEFAULT_DATA_PATH = "public/data/restaurants.json";
 const DEFAULT_CACHE_PATH = ".cache/good-price-geocoding.json";
@@ -296,15 +297,12 @@ async function geocodeRestaurant(restaurant, apiKey) {
   keywordUrl.searchParams.set("size", "15");
   keywordUrl.searchParams.set("sort", "distance");
   const keywordBody = await callKakao(keywordUrl, apiKey);
-  const normalizedName = normalizeText(restaurant.name);
-  const place = (keywordBody?.documents ?? [])
-    .filter((document) => normalizeText(document.place_name) === normalizedName)
-    .map((document) => ({
-      document,
-      distance: Number(document.distance),
-    }))
-    .filter(({ distance }) => Number.isFinite(distance) && distance <= 500)
-    .sort((left, right) => left.distance - right.distance)[0]?.document;
+  const match = selectKakaoPlaceMatch(
+    keywordBody?.documents ?? [],
+    restaurant,
+  );
+  const place = match?.place;
+  const checkedAt = new Date().toISOString();
 
   return {
     latitude,
@@ -313,10 +311,23 @@ async function geocodeRestaurant(restaurant, apiKey) {
     ...(place?.place_url
       ? { kakaoPlaceUrl: String(place.place_url).replace(/^http:/, "https:") }
       : {}),
+    placeVerification: match
+      ? {
+          provider: "kakao",
+          status: "confirmed",
+          matchedBy: match.matchedBy,
+          distanceMeters: match.distanceMeters,
+          checkedAt,
+        }
+      : {
+          provider: "kakao",
+          status: "unverified",
+          checkedAt,
+        },
   };
 }
 
-function mergeWithLocation(source, existing, location) {
+export function mergeWithLocation(source, existing, location) {
   return {
     id: existing?.id ?? createRestaurantId(source),
     name: source.name,
@@ -333,6 +344,12 @@ function mergeWithLocation(source, existing, location) {
       : {}),
     ...(existing?.kakaoPlaceUrl || location.kakaoPlaceUrl
       ? { kakaoPlaceUrl: existing?.kakaoPlaceUrl ?? location.kakaoPlaceUrl }
+      : {}),
+    ...(existing?.placeVerification || location.placeVerification
+      ? {
+          placeVerification:
+            existing?.placeVerification ?? location.placeVerification,
+        }
       : {}),
   };
 }

@@ -92,6 +92,13 @@ describe("데이터셋 감사", () => {
       createRestaurant({
         id: "a",
         kakaoPlaceId: "100",
+        placeVerification: {
+          provider: "kakao",
+          status: "confirmed",
+          matchedBy: "name-address",
+          distanceMeters: 10,
+          checkedAt: "2026-08-18T00:00:00.000Z",
+        },
         menus: [{ name: "상차림비", price: 3_000 }],
       }),
       createRestaurant({
@@ -117,8 +124,12 @@ describe("데이터셋 감사", () => {
 
     expect(result.summary).toMatchObject({
       totalRestaurants: 3,
-      kakaoConfirmedRestaurants: 2,
-      kakaoUnconfirmedRestaurants: 1,
+      kakaoPlaceIdRestaurants: 2,
+      kakaoConfirmedRestaurants: 1,
+      kakaoUnconfirmedRestaurants: 2,
+      kakaoLegacyPlaceIdRestaurants: 1,
+      kakaoCheckedUnverifiedRestaurants: 0,
+      kakaoUncheckedRestaurants: 2,
       duplicateKakaoPlaceGroups: 1,
       duplicateNameAddressGroups: 1,
       suspectedSideMenuEntries: 1,

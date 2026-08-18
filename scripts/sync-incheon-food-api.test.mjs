@@ -116,6 +116,13 @@ describe("인천 스마트음식관광 API 변환", () => {
             name: "기존 이름",
             kakaoPlaceId: "123",
             kakaoPlaceUrl: "https://place.map.kakao.com/123",
+            placeVerification: {
+              provider: "kakao",
+              status: "confirmed",
+              matchedBy: "name-address",
+              distanceMeters: 12,
+              checkedAt: "2026-08-18T00:00:00.000Z",
+            },
           },
         ],
       ),
@@ -125,6 +132,13 @@ describe("인천 스마트음식관광 API 변환", () => {
         name: "새 이름",
         kakaoPlaceId: "123",
         kakaoPlaceUrl: "https://place.map.kakao.com/123",
+        placeVerification: {
+          provider: "kakao",
+          status: "confirmed",
+          matchedBy: "name-address",
+          distanceMeters: 12,
+          checkedAt: "2026-08-18T00:00:00.000Z",
+        },
       },
     ]);
   });
