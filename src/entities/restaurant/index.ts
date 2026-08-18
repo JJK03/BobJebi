@@ -18,6 +18,7 @@ export {
 export {
   filterRestaurants,
   getAffordableMenus,
+  isMealMenu,
   type FilterConditions,
   type RestaurantCandidate,
 } from './model/filters'

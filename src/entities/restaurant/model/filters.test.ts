@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { Restaurant } from './restaurant'
-import { filterRestaurants, getAffordableMenus } from './filters'
+import {
+  filterRestaurants,
+  getAffordableMenus,
+  isMealMenu,
+} from './filters'
 
 const restaurants: Restaurant[] = [
   {
@@ -36,6 +40,50 @@ describe('getAffordableMenus', () => {
       { name: '비빔밥', price: 8_000 },
     ])
   })
+
+  it('예산 이하더라도 음료, 주류, 추가 메뉴는 제외한다', () => {
+    const restaurant: Restaurant = {
+      ...restaurants[0],
+      id: 'jokbal-with-drinks',
+      name: '족발집',
+      menus: [
+        { name: '소주', price: 4_000 },
+        { name: '매화수', price: 5_000 },
+        { name: '공기밥', price: 1_000 },
+        { name: '라면사리 추가', price: 2_000 },
+        { name: '족발(중)', price: 35_000 },
+      ],
+    }
+
+    expect(getAffordableMenus(restaurant, 10_000)).toEqual([])
+  })
+})
+
+describe('isMealMenu', () => {
+  it.each([
+    '소주',
+    '생맥주 500cc',
+    '콜라',
+    '매화수',
+    '공기밥',
+    '우동사리',
+    '치즈 토핑',
+    '핫소스',
+    '무채 추가',
+    '보쌈속(무채)',
+  ])('%s는 식사 메뉴로 보지 않는다', (name) => {
+    expect(isMealMenu({ name, price: 5_000 })).toBe(false)
+  })
+
+  it.each([
+    '보쌈정식',
+    '비빔밥',
+    '와인삼겹살',
+    '치킨+생맥주 세트',
+    '피자+콜라 세트',
+  ])('%s는 음식이 포함된 식사 메뉴로 유지한다', (name) => {
+    expect(isMealMenu({ name, price: 10_000 })).toBe(true)
+  })
 })
 
 describe('filterRestaurants', () => {
@@ -59,6 +107,31 @@ describe('filterRestaurants', () => {
       budget: 5_000,
       maxDistanceMeters: 500,
     })
+
+    expect(result).toEqual([])
+  })
+
+  it('저가 메뉴가 주류와 추가 메뉴뿐인 식당은 후보에서 제외한다', () => {
+    const result = filterRestaurants(
+      [
+        {
+          ...restaurants[0],
+          id: 'expensive-jokbal',
+          name: '비싼 족발집',
+          menus: [
+            { name: '소주', price: 4_000 },
+            { name: '공기밥', price: 1_000 },
+            { name: '족발 대', price: 40_000 },
+          ],
+        },
+      ],
+      {
+        userPosition: { latitude: 37, longitude: 127 },
+        category: '한식',
+        budget: 10_000,
+        maxDistanceMeters: 1_000,
+      },
+    )
 
     expect(result).toEqual([])
   })
