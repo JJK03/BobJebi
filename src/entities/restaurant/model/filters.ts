@@ -81,6 +81,9 @@ const CURATED_FILTER_CATEGORY_BY_KAKAO_PLACE_ID: Readonly<
   '1136047260': '베이커리·디저트', // 크러스트
   '10199351': '아시아음식', // 까르본: 우즈베키스탄 음식 전문점
   '13657074': '주점·안주', // 트라이포트: 위스키·주류 전문점
+  '16630201': '주점·안주', // 추억의포장마차: 원본 중식 오분류
+  '24481763': '베이커리·디저트', // 파리바게뜨 송도센트럴파크점: 원본 중식 오분류
+  '1422120170': '아시아음식', // 흥성양꼬치 송도점: 원본 중식 오분류
 }
 
 type CategoryPatternRule = readonly [
@@ -212,6 +215,10 @@ export function getRestaurantFilterCategory(
     return curatedCategory
   }
 
+  if (restaurant.category !== '기타요식업') {
+    return restaurant.category
+  }
+
   const restaurantName = normalizeMenuName(restaurant.name)
   const businessCategory = getMatchingCategory(
     restaurantName,
@@ -219,10 +226,6 @@ export function getRestaurantFilterCategory(
   )
   if (businessCategory) {
     return businessCategory
-  }
-
-  if (restaurant.category !== '기타요식업') {
-    return restaurant.category
   }
 
   const menuText = normalizeMenuName(

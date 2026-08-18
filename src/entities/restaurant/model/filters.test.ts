@@ -279,16 +279,22 @@ describe('getRestaurantFilterCategory', () => {
   })
 
   it.each([
-    ['추억의포장마차', '계란말이', '주점·안주'],
-    ['파리바게뜨 송도센트럴파크점', '소금빵', '베이커리·디저트'],
-    ['흥성양꼬치 송도점', '숙성 생양꼬치', '아시아음식'],
+    ['16630201', '추억의포장마차', '계란말이', '주점·안주'],
+    [
+      '24481763',
+      '파리바게뜨 송도센트럴파크점',
+      '소금빵',
+      '베이커리·디저트',
+    ],
+    ['1422120170', '흥성양꼬치 송도점', '숙성 생양꼬치', '아시아음식'],
   ])(
-    '원본이 중식이어도 %s의 강한 업종 신호를 우선한다',
-    (name, menuName, expected) => {
+    '카카오 장소 ID %s로 확인된 %s의 원본 오분류만 보정한다',
+    (kakaoPlaceId, name, menuName, expected) => {
       expect(
         getRestaurantFilterCategory({
           ...restaurants[0],
           id: `source-category-override-${name}`,
+          kakaoPlaceId,
           name,
           category: '중식',
           menus: [{ name: menuName, price: 10_000 }],
@@ -296,6 +302,18 @@ describe('getRestaurantFilterCategory', () => {
       ).toBe(expected)
     },
   )
+
+  it('개별 보정되지 않은 상호명은 원본 분류보다 우선하지 않는다', () => {
+    expect(
+      getRestaurantFilterCategory({
+        ...restaurants[0],
+        id: 'uncurated-source-category',
+        name: '이름만 포차인 식당',
+        category: '한식',
+        menus: [{ name: '계란말이', price: 10_000 }],
+      }),
+    ).toBe('한식')
+  })
 
   it('강한 반대 신호가 없는 정상 중식은 원본 분류를 유지한다', () => {
     expect(
