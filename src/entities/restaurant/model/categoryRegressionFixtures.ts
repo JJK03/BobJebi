@@ -180,6 +180,14 @@ export const CATEGORY_REGRESSION_FIXTURES: readonly CategoryRegressionFixture[] 
   },
   {
     source: 'incheon-smart-food',
+    id: 'incheon-169774',
+    kakaoPlaceId: '13657074',
+    name: '트라이포트',
+    menuNames: ['제임슨', '발렌타인', '조니워커 블랙', '글렌피딕 12Y'],
+    expectedCategory: '주점·안주',
+  },
+  {
+    source: 'incheon-smart-food',
     id: 'incheon-158880',
     kakaoPlaceId: '1183405825',
     name: '주가네포차',

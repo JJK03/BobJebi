@@ -209,9 +209,38 @@ describe('isCafeRestaurant', () => {
 
     expect(isCafeRestaurant(bakery)).toBe(false)
   })
+
+  it('스타벅스와 띄어 쓴 음료 메뉴를 순수 카페로 판별한다', () => {
+    const starbucks: Restaurant = {
+      ...restaurants[0],
+      id: 'incheon-932371',
+      name: '스타벅스 송도트리플R점',
+      category: '기타요식업',
+      menus: [
+        { name: '콜드 브루', price: 4_500 },
+        { name: '카페 라떼', price: 4_600 },
+        { name: '자몽 허니 블랙 티', price: 5_300 },
+        { name: '자바 칩 프라푸치노', price: 6_100 },
+      ],
+    }
+
+    expect(isCafeRestaurant(starbucks)).toBe(true)
+  })
 })
 
 describe('getRestaurantFilterCategory', () => {
+  it('자바 칩의 바를 주점 bar로 오인하지 않는다', () => {
+    expect(
+      getRestaurantFilterCategory({
+        ...restaurants[0],
+        id: 'java-chip-cafe',
+        name: '이름없는커피매장',
+        category: '기타요식업',
+        menus: [{ name: '자바 칩 프라푸치노', price: 6_100 }],
+      }),
+    ).toBeNull()
+  })
+
   it.each([
     ['김밥마을', '참치김밥', '분식·간편식'],
     ['박은선닭꼬치', '순살닭꼬치', '분식·간편식'],
