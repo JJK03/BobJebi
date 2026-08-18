@@ -35,7 +35,7 @@ const BEVERAGE_OR_ALCOHOL_PATTERN =
 const MEAL_SIGNAL_PATTERN =
   /정식|백반|밥|국|탕|찌개|전골|면|국수|냉면|라면|우동|파스타|피자|치킨|족발|보쌈|고기|갈비|삼겹|스테이크|버거|김밥|떡볶이|만두|샐러드|볶음|구이|튀김|파전|김치전|해물전|부추전|감자전|빈대떡|찜|죽|덮밥|돈가스|돈까스|회|초밥|스시|카레|쌈|수육/i
 const CAFE_NAME_PATTERN =
-  /카페|커피숍|커피|다방|찻집|티룸|cafe|coffee|로스터리|로스터스/i
+  /카페|커피숍|커피|다방|찻집|약차|티룸|cafe|coffee|로스터리|로스터스/i
 const BAKERY_NAME_PATTERN =
   /베이커리|제과|제빵|빵집|브레드|도넛|bakery|쌀빵/i
 const CAFE_MENU_PATTERN =
@@ -68,6 +68,13 @@ const NON_RESTAURANT_BUSINESS_PATTERN =
   /축산물|정육점|정육마트|반찬가게|반찬점|식품(?:판매장)?|김치(?:가게|판매|$)|먹을거리|계란$/i
 const RETAIL_PRODUCT_PATTERN =
   /고추장|된장|막장|김치\s*\(?\d+(?:\.\d+)?\s*kg|원두\s*\d+\s*g/i
+
+const CURATED_FILTER_CATEGORY_BY_KAKAO_PLACE_ID: Readonly<
+  Partial<Record<string, RestaurantFilterCategory>>
+> = {
+  '1136047260': '베이커리·디저트', // 크러스트
+  '10199351': '아시아음식', // 까르본: 우즈베키스탄 음식 전문점
+}
 
 function normalizeMenuName(name: string): string {
   return name.normalize('NFKC').replace(/\s+/g, ' ').trim()
@@ -139,7 +146,14 @@ export function isNonRestaurantBusiness(restaurant: Restaurant): boolean {
 
 export function getRestaurantFilterCategory(
   restaurant: Restaurant,
-): RestaurantFilterCategory {
+): RestaurantFilterCategory | null {
+  const curatedCategory = restaurant.kakaoPlaceId
+    ? CURATED_FILTER_CATEGORY_BY_KAKAO_PLACE_ID[restaurant.kakaoPlaceId]
+    : undefined
+  if (curatedCategory) {
+    return curatedCategory
+  }
+
   if (restaurant.category !== '기타요식업') {
     return restaurant.category
   }
@@ -182,7 +196,7 @@ export function getRestaurantFilterCategory(
     return '고기·구이'
   }
 
-  return '기타 음식점'
+  return null
 }
 
 export function getAffordableMenus(
@@ -209,6 +223,10 @@ export function filterRestaurants(
     }
 
     const restaurantCategory = getRestaurantFilterCategory(restaurant)
+    if (restaurantCategory === null) {
+      continue
+    }
+
     if (
       conditions.category !== ALL_CATEGORY_FILTER &&
       restaurantCategory !== conditions.category

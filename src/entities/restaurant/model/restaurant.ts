@@ -22,7 +22,6 @@ export const RESTAURANT_FILTER_CATEGORIES = [
   '해산물·회',
   '고기·구이',
   '주점·안주',
-  '기타 음식점',
 ] as const
 
 export const ALL_CATEGORY_FILTER = '전체' as const

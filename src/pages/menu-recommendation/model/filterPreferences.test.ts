@@ -32,7 +32,7 @@ describe('filterPreferences', () => {
     )
   })
 
-  it('세분화된 기타 음식점 선택을 복원한다', () => {
+  it('세분화된 음식 종류 선택을 복원한다', () => {
     const preferences = {
       ...createEmptyFilterPreferences(),
       category: '분식·간편식' as const,
@@ -54,6 +54,17 @@ describe('filterPreferences', () => {
           budget: 99_000,
           travelMode: 'flying',
           travelTimeLimit: 999,
+        }),
+      ),
+    ).toEqual(createEmptyFilterPreferences())
+
+    expect(
+      parseFilterPreferences(
+        JSON.stringify({
+          category: '기타 음식점',
+          budget: null,
+          travelMode: null,
+          travelTimeLimit: null,
         }),
       ),
     ).toEqual(createEmptyFilterPreferences())

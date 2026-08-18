@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BUDGET_OPTIONS,
   CATEGORY_FILTER_OPTIONS,
@@ -10,6 +11,18 @@ import {
   type TravelTimeLimit,
 } from "../../../entities/restaurant";
 import "./FilterPanel.css";
+
+const PRIMARY_CATEGORY_OPTIONS: readonly CategoryFilter[] = [
+  "전체",
+  "한식",
+  "중식",
+  "일식",
+  "양식",
+];
+
+const DETAIL_CATEGORY_OPTIONS = CATEGORY_FILTER_OPTIONS.filter(
+  (option) => !PRIMARY_CATEGORY_OPTIONS.includes(option),
+);
 
 interface FilterPanelProps {
   category: CategoryFilter | null;
@@ -36,9 +49,24 @@ export function FilterPanel({
   onTravelTimeChange,
   onReset,
 }: FilterPanelProps) {
+  const [isDetailCategoryOpen, setIsDetailCategoryOpen] = useState(false);
   const wideRangeLabel = travelMode
     ? getWideTravelRangeLabel(travelMode)
     : "넓게 보기";
+  const selectedDetailCategory =
+    category !== null && DETAIL_CATEGORY_OPTIONS.includes(category)
+      ? category
+      : null;
+
+  const selectPrimaryCategory = (option: CategoryFilter) => {
+    setIsDetailCategoryOpen(false);
+    onCategoryChange(option);
+  };
+
+  const selectDetailCategory = (option: CategoryFilter) => {
+    setIsDetailCategoryOpen(false);
+    onCategoryChange(option);
+  };
 
   return (
     <section className="filter-panel">
@@ -63,18 +91,63 @@ export function FilterPanel({
       <fieldset>
         <legend>음식 종류</legend>
         <div className="chip-group category-chips">
-          {CATEGORY_FILTER_OPTIONS.map((option) => (
+          {PRIMARY_CATEGORY_OPTIONS.map((option) => (
             <button
               type="button"
               className={category === option ? "chip is-selected" : "chip"}
               aria-pressed={category === option}
-              onClick={() => onCategoryChange(option)}
+              onClick={() => selectPrimaryCategory(option)}
               key={option}
             >
               {option}
             </button>
           ))}
+          <button
+            type="button"
+            className={
+              selectedDetailCategory ? "chip category-more is-selected" : "chip category-more"
+            }
+            aria-expanded={isDetailCategoryOpen}
+            aria-controls="detail-category-options"
+            aria-pressed={selectedDetailCategory !== null}
+            aria-label={
+              selectedDetailCategory
+                ? `더보기, 선택됨: ${selectedDetailCategory}`
+                : "더보기"
+            }
+            onClick={() => setIsDetailCategoryOpen((isOpen) => !isOpen)}
+          >
+            <span className="category-more-label">
+              <span>더보기</span>
+              {selectedDetailCategory ? (
+                <span className="category-more-selection">
+                  {selectedDetailCategory}
+                </span>
+              ) : null}
+            </span>
+            <span className="category-more-icon" aria-hidden="true">
+              {isDetailCategoryOpen ? "−" : "+"}
+            </span>
+          </button>
         </div>
+        {isDetailCategoryOpen ? (
+          <div
+            className="chip-group category-detail-chips"
+            id="detail-category-options"
+          >
+            {DETAIL_CATEGORY_OPTIONS.map((option) => (
+              <button
+                type="button"
+                className={category === option ? "chip is-selected" : "chip"}
+                aria-pressed={category === option}
+                onClick={() => selectDetailCategory(option)}
+                key={option}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </fieldset>
 
       <fieldset>

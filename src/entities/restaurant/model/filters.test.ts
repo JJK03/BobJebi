@@ -154,6 +154,23 @@ describe('isCafeRestaurant', () => {
     expect(isCafeRestaurant(teaHouse)).toBe(true)
   })
 
+  it('오장육부약차를 순수 전통차 카페로 판별한다', () => {
+    const traditionalTeaCafe: Restaurant = {
+      ...restaurants[0],
+      id: 'incheon-195854',
+      name: '오장육부약차',
+      category: '기타요식업',
+      kakaoPlaceId: '133941267',
+      menus: [
+        { name: '제호차', price: 5_000 },
+        { name: '헛개나무차', price: 5_000 },
+        { name: '계란동동 쌍화차', price: 6_500 },
+      ],
+    }
+
+    expect(isCafeRestaurant(traditionalTeaCafe)).toBe(true)
+  })
+
   it('동네 이름의 우동은 식사 메뉴로 오인하지 않는다', () => {
     const cafe: Restaurant = {
       ...restaurants[0],
@@ -214,7 +231,7 @@ describe('getRestaurantFilterCategory', () => {
     ['숲풀림곱창', '모둠곱창', '고기·구이'],
     ['국민먹태', '바삭먹태', '주점·안주'],
     ['호주가', 'IPA', '주점·안주'],
-    ['이름없는가게', '오늘의 메뉴', '기타 음식점'],
+    ['이름없는가게', '오늘의 메뉴', null],
   ])('%s을(를) %s 메뉴로 %s에 분류한다', (name, menuName, expected) => {
     const restaurant: Restaurant = {
       ...restaurants[0],
@@ -230,6 +247,26 @@ describe('getRestaurantFilterCategory', () => {
   it('기존 한식, 중식, 일식, 양식 분류는 그대로 유지한다', () => {
     expect(getRestaurantFilterCategory(restaurants[0])).toBe('한식')
     expect(getRestaurantFilterCategory(restaurants[1])).toBe('중식')
+  })
+
+  it.each([
+    ['크러스트', '1136047260', '베이커리·디저트'],
+    ['까르본', '10199351', '아시아음식'],
+  ])('%s의 검증된 카카오 장소를 올바른 음식 종류로 분류한다', (
+    name,
+    kakaoPlaceId,
+    expected,
+  ) => {
+    expect(
+      getRestaurantFilterCategory({
+        ...restaurants[0],
+        id: kakaoPlaceId,
+        name,
+        category: '기타요식업',
+        kakaoPlaceId,
+        menus: [{ name: '세트 메뉴', price: 20_000 }],
+      }),
+    ).toBe(expected)
   })
 })
 
@@ -404,6 +441,28 @@ describe('filterRestaurants', () => {
           name: '영풍축산물판매장',
           category: '기타요식업',
           menus: [{ name: '삼겹살 100g', price: 3_000 }],
+        },
+      ],
+      {
+        userPosition: { latitude: 37, longitude: 127 },
+        category: '전체',
+        budget: 10_000,
+        maxDistanceMeters: 1_000,
+      },
+    )
+
+    expect(result).toEqual([])
+  })
+
+  it('세부 분류를 확인할 수 없는 기타 음식점은 전체 후보에서도 제외한다', () => {
+    const result = filterRestaurants(
+      [
+        {
+          ...restaurants[0],
+          id: 'unclassified-restaurant',
+          name: '이름없는가게',
+          category: '기타요식업',
+          menus: [{ name: '오늘의 메뉴', price: 9_000 }],
         },
       ],
       {

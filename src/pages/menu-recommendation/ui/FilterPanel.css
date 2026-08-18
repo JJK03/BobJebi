@@ -49,6 +49,40 @@ legend {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.category-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.category-more-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.15;
+}
+
+.category-more-selection {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.88;
+}
+
+.category-more-icon {
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.category-detail-chips {
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 4px;
+  background: #f7f6f1;
+}
+
 .chip {
   min-height: 42px;
   padding: 8px 9px;
@@ -95,6 +129,10 @@ legend {
 
 @media (max-width: 680px) {
   .chip-group.category-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chip-group.category-detail-chips {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

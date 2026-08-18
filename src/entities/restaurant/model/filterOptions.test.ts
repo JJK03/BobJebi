@@ -8,6 +8,7 @@ import {
 describe('filterOptions', () => {
   it('기타요식업 대신 세분화된 음식 종류를 제공한다', () => {
     expect(CATEGORY_FILTER_OPTIONS).not.toContain('기타요식업')
+    expect(CATEGORY_FILTER_OPTIONS).not.toContain('기타 음식점')
     expect(CATEGORY_FILTER_OPTIONS).toEqual(
       expect.arrayContaining([
         '분식·간편식',
@@ -19,7 +20,6 @@ describe('filterOptions', () => {
         '해산물·회',
         '고기·구이',
         '주점·안주',
-        '기타 음식점',
       ]),
     )
   })
