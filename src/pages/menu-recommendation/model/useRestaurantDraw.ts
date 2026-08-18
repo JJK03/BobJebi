@@ -14,6 +14,8 @@ export function useRestaurantDraw(
 ) {
   const [state, setState] = useState<DrawState>({ status: 'idle' })
   const timerRef = useRef<number | undefined>(undefined)
+  const drawnRestaurantIdsRef = useRef(new Set<string>())
+  const lastSelectedRestaurantIdRef = useRef<string | undefined>(undefined)
 
   const clearTimer = useCallback(() => {
     if (timerRef.current === undefined) {
@@ -28,6 +30,8 @@ export function useRestaurantDraw(
 
   const clearResult = useCallback(() => {
     clearTimer()
+    drawnRestaurantIdsRef.current.clear()
+    lastSelectedRestaurantIdRef.current = undefined
     setState({ status: 'idle' })
   }, [clearTimer])
 
@@ -36,7 +40,23 @@ export function useRestaurantDraw(
       return
     }
 
-    const winner = pickRandomItem(candidates)
+    let availableCandidates = candidates.filter(
+      ({ restaurant }) =>
+        !drawnRestaurantIdsRef.current.has(restaurant.id),
+    )
+
+    if (availableCandidates.length === 0) {
+      drawnRestaurantIdsRef.current.clear()
+      availableCandidates =
+        candidates.length > 1
+          ? candidates.filter(
+              ({ restaurant }) =>
+                restaurant.id !== lastSelectedRestaurantIdRef.current,
+            )
+          : [...candidates]
+    }
+
+    const winner = pickRandomItem(availableCandidates)
     if (!winner) {
       return
     }
@@ -44,6 +64,8 @@ export function useRestaurantDraw(
     setState({ status: 'drawing' })
     timerRef.current = window.setTimeout(() => {
       timerRef.current = undefined
+      drawnRestaurantIdsRef.current.add(winner.restaurant.id)
+      lastSelectedRestaurantIdRef.current = winner.restaurant.id
       setState({ status: 'selected', restaurant: winner })
     }, DRAW_DURATION_MS)
   }, [candidates])
