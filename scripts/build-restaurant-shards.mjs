@@ -20,6 +20,25 @@ const DATASETS = {
   },
 };
 
+const wait = (milliseconds) =>
+  new Promise((resolveWait) => setTimeout(resolveWait, milliseconds));
+
+async function retryWindowsFileOperation(operation) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      const isTemporaryWindowsLock = ["EPERM", "EACCES", "EBUSY"].includes(
+        error?.code,
+      );
+      if (!isTemporaryWindowsLock || attempt === 9) {
+        throw error;
+      }
+      await wait(100 * (attempt + 1));
+    }
+  }
+}
+
 function readArgument(name) {
   const prefix = `--${name}=`;
   return process.argv
@@ -121,8 +140,12 @@ export async function buildRestaurantShards(source) {
       "utf8",
     );
 
-    await rm(config.outputDirectory, { recursive: true, force: true });
-    await rename(temporaryDirectory, config.outputDirectory);
+    await retryWindowsFileOperation(() =>
+      rm(config.outputDirectory, { recursive: true, force: true }),
+    );
+    await retryWindowsFileOperation(() =>
+      rename(temporaryDirectory, config.outputDirectory),
+    );
     console.log(
       `${source}: 식당 ${restaurants.length.toLocaleString("ko-KR")}곳을 ${tiles.size.toLocaleString("ko-KR")}개 위치 조각으로 생성했습니다.`,
     );

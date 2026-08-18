@@ -1,6 +1,6 @@
 import {
   ALL_CATEGORY_FILTER,
-  RESTAURANT_CATEGORIES,
+  RESTAURANT_FILTER_CATEGORIES,
   type CategoryFilter,
 } from './restaurant'
 import {
@@ -18,7 +18,7 @@ export const UNLIMITED_BUDGET = Number.POSITIVE_INFINITY
 
 export const CATEGORY_FILTER_OPTIONS: readonly CategoryFilter[] = [
   ALL_CATEGORY_FILTER,
-  ...RESTAURANT_CATEGORIES,
+  ...RESTAURANT_FILTER_CATEGORIES,
 ]
 
 export const BUDGET_OPTIONS = [

@@ -32,6 +32,17 @@ describe('filterPreferences', () => {
     )
   })
 
+  it('세분화된 기타 음식점 선택을 복원한다', () => {
+    const preferences = {
+      ...createEmptyFilterPreferences(),
+      category: '분식·간편식' as const,
+    }
+
+    expect(parseFilterPreferences(serializeFilterPreferences(preferences))).toEqual(
+      preferences,
+    )
+  })
+
   it('깨지거나 허용되지 않은 값은 미선택으로 복구한다', () => {
     expect(parseFilterPreferences('not-json')).toEqual(
       createEmptyFilterPreferences(),

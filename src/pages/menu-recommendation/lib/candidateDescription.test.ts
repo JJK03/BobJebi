@@ -18,8 +18,8 @@ describe('getCandidateDescription', () => {
     expect(getCandidateDescription('중식', 15_000)).toBe(
       '15,000원 이하 중식 후보가 참여해요',
     )
-    expect(getCandidateDescription('기타요식업', 20_000)).toBe(
-      '20,000원 이하 기타요식업 후보가 참여해요',
+    expect(getCandidateDescription('베이커리·디저트', 20_000)).toBe(
+      '20,000원 이하 베이커리·디저트 후보가 참여해요',
     )
   })
 

@@ -23,7 +23,7 @@ export function RecommendationCard({
   onRetry,
   onChangeConditions,
 }: RecommendationCardProps) {
-  const { restaurant, affordableMenus, distanceMeters } = candidate;
+  const { restaurant, category, affordableMenus, distanceMeters } = candidate;
   const kakaoMapUrl =
     restaurant.kakaoPlaceUrl ??
     (restaurant.kakaoPlaceId
@@ -45,11 +45,11 @@ export function RecommendationCard({
           <p className="eyebrow">뽑기 결과</p>
           <h2 id="result-title">{restaurant.name}</h2>
           <p className="result-summary">
-            {restaurant.category} · 직선거리 {formatDistance(distanceMeters)} ·
+            {category} · 직선거리 {formatDistance(distanceMeters)} ·
             예상 {travelLabel} {travelMinutes}분
           </p>
         </div>
-        <span className="category-badge">{restaurant.category}</span>
+        <span className="category-badge">{category}</span>
       </div>
 
       <div className="menu-box">

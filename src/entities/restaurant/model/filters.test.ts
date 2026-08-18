@@ -3,8 +3,10 @@ import type { Restaurant } from './restaurant'
 import {
   filterRestaurants,
   getAffordableMenus,
+  getRestaurantFilterCategory,
   isCafeRestaurant,
   isMealMenu,
+  isNonRestaurantBusiness,
 } from './filters'
 
 const restaurants: Restaurant[] = [
@@ -58,6 +60,23 @@ describe('getAffordableMenus', () => {
 
     expect(getAffordableMenus(restaurant, 10_000)).toEqual([])
   })
+
+  it('음식명이 없거나 아동용 가격인 메뉴는 제외한다', () => {
+    const restaurant: Restaurant = {
+      ...restaurants[0],
+      id: 'vague-menu-data',
+      menus: [
+        { name: '본채', price: 5_000 },
+        { name: '1가지 메뉴', price: 8_000 },
+        { name: '평일 점심 미취학', price: 9_000 },
+        { name: '성인 조식', price: 15_000 },
+      ],
+    }
+
+    expect(getAffordableMenus(restaurant, 20_000)).toEqual([
+      { name: '성인 조식', price: 15_000 },
+    ])
+  })
 })
 
 describe('isMealMenu', () => {
@@ -72,6 +91,9 @@ describe('isMealMenu', () => {
     '핫소스',
     '무채 추가',
     '보쌈속(무채)',
+    '위스키',
+    'apple martini',
+    'IPA',
   ])('%s는 식사 메뉴로 보지 않는다', (name) => {
     expect(isMealMenu({ name, price: 5_000 })).toBe(false)
   })
@@ -104,6 +126,45 @@ describe('isCafeRestaurant', () => {
     expect(isCafeRestaurant(cafe)).toBe(true)
   })
 
+  it('커피 로스팅을 뜻하는 볶음은 식사 메뉴로 오인하지 않는다', () => {
+    const cafe: Restaurant = {
+      ...restaurants[0],
+      id: 'coffee-roasting',
+      name: '커피볶음',
+      menus: [
+        { name: '아메리카노', price: 3_000 },
+        { name: '카페라떼', price: 4_000 },
+      ],
+    }
+
+    expect(isCafeRestaurant(cafe)).toBe(true)
+  })
+
+  it('전통차와 식혜만 파는 곳도 순수 카페로 판별한다', () => {
+    const teaHouse: Restaurant = {
+      ...restaurants[0],
+      id: 'traditional-tea',
+      name: '물안개정원',
+      menus: [
+        { name: '오미자차', price: 5_000 },
+        { name: '수제식혜', price: 4_000 },
+      ],
+    }
+
+    expect(isCafeRestaurant(teaHouse)).toBe(true)
+  })
+
+  it('동네 이름의 우동은 식사 메뉴로 오인하지 않는다', () => {
+    const cafe: Restaurant = {
+      ...restaurants[0],
+      id: 'seokwoo-cafe',
+      name: '석우동카페',
+      menus: [{ name: '아메리카노', price: 3_000 }],
+    }
+
+    expect(isCafeRestaurant(cafe)).toBe(true)
+  })
+
   it('식사 메뉴가 있는 카페는 식당 후보로 유지한다', () => {
     const brunchCafe: Restaurant = {
       ...restaurants[0],
@@ -130,6 +191,101 @@ describe('isCafeRestaurant', () => {
     }
 
     expect(isCafeRestaurant(bakery)).toBe(false)
+  })
+})
+
+describe('getRestaurantFilterCategory', () => {
+  it.each([
+    ['김밥마을', '참치김밥', '분식·간편식'],
+    ['박은선닭꼬치', '순살닭꼬치', '분식·간편식'],
+    ['만두의정석', '고기만두', '분식·간편식'],
+    ['리오브리또', '브리또', '분식·간편식'],
+    ['옛날통닭', '후라이드치킨', '치킨·피자'],
+    ['토리베이커리', '소금빵', '베이커리·디저트'],
+    ['꼼빠도르', '팥빵', '베이커리·디저트'],
+    ['이가떡방', '떡 1팩', '베이커리·디저트'],
+    ['복래춘', '월병', '베이커리·디저트'],
+    ['스윗샐러드', '닭가슴살샐러드', '샐러드·브런치'],
+    ['행복뷔페', '점심 뷔페', '뷔페'],
+    ['라마다송도호텔', '성인 조식', '뷔페'],
+    ['사이공키친', '소고기쌀국수', '아시아음식'],
+    ['전원일기', '마제소바', '일식'],
+    ['참숯불꼼장어', '꼼장어 1인분', '해산물·회'],
+    ['숲풀림곱창', '모둠곱창', '고기·구이'],
+    ['국민먹태', '바삭먹태', '주점·안주'],
+    ['호주가', 'IPA', '주점·안주'],
+    ['이름없는가게', '오늘의 메뉴', '기타 음식점'],
+  ])('%s을(를) %s 메뉴로 %s에 분류한다', (name, menuName, expected) => {
+    const restaurant: Restaurant = {
+      ...restaurants[0],
+      id: `${name}-${menuName}`,
+      name,
+      category: '기타요식업',
+      menus: [{ name: menuName, price: 9_000 }],
+    }
+
+    expect(getRestaurantFilterCategory(restaurant)).toBe(expected)
+  })
+
+  it('기존 한식, 중식, 일식, 양식 분류는 그대로 유지한다', () => {
+    expect(getRestaurantFilterCategory(restaurants[0])).toBe('한식')
+    expect(getRestaurantFilterCategory(restaurants[1])).toBe('중식')
+  })
+})
+
+describe('isNonRestaurantBusiness', () => {
+  it.each([
+    '영풍축산물판매장',
+    '동네정육점',
+    '착한김치',
+    '우리반찬가게',
+    '해인식품',
+    '협동조합 먹을거리',
+  ])('%s은 식당이 아닌 식품 판매점으로 판별한다', (name) => {
+    expect(
+      isNonRestaurantBusiness({
+        ...restaurants[0],
+        id: name,
+        name,
+      }),
+    ).toBe(true)
+  })
+
+  it('김치찌개 식당은 판매점으로 제외하지 않는다', () => {
+    expect(
+      isNonRestaurantBusiness({
+        ...restaurants[0],
+        id: 'kimchi-stew',
+        name: '착한김치찌개집',
+      }),
+    ).toBe(false)
+  })
+
+  it('장류와 포장 원두가 메뉴 대부분이면 판매점으로 판별한다', () => {
+    expect(
+      isNonRestaurantBusiness({
+        ...restaurants[0],
+        id: 'traditional-products',
+        name: '온유두담',
+        menus: [
+          { name: '콩탕 1kg', price: 8_000 },
+          { name: '전통찹쌀고추장 500g', price: 25_000 },
+          { name: '강원도막장 800g', price: 30_000 },
+        ],
+      }),
+    ).toBe(true)
+
+    expect(
+      isNonRestaurantBusiness({
+        ...restaurants[0],
+        id: 'coffee-bean-store',
+        name: '어울림',
+        menus: [
+          { name: '콜롬비아 원두 100g', price: 3_000 },
+          { name: '블렌딩 원두 100g', price: 3_600 },
+        ],
+      }),
+    ).toBe(true)
   })
 })
 
@@ -200,6 +356,59 @@ describe('filterRestaurants', () => {
       {
         userPosition: { latitude: 37, longitude: 127 },
         category: '중식',
+        budget: 10_000,
+        maxDistanceMeters: 1_000,
+      },
+    )
+
+    expect(result).toEqual([])
+  })
+
+  it('기타요식업의 세부 카테고리로 후보를 필터링한다', () => {
+    const result = filterRestaurants(
+      [
+        {
+          ...restaurants[0],
+          id: 'quick-meal',
+          name: '착한김밥',
+          category: '기타요식업',
+          menus: [{ name: '참치김밥', price: 5_000 }],
+        },
+        {
+          ...restaurants[0],
+          id: 'pizza-shop',
+          name: '착한피자',
+          category: '기타요식업',
+          menus: [{ name: '치즈피자', price: 9_000 }],
+        },
+      ],
+      {
+        userPosition: { latitude: 37, longitude: 127 },
+        category: '분식·간편식',
+        budget: 10_000,
+        maxDistanceMeters: 1_000,
+      },
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].restaurant.id).toBe('quick-meal')
+    expect(result[0].category).toBe('분식·간편식')
+  })
+
+  it('식품 판매점은 예산에 맞는 품목이 있어도 후보에서 제외한다', () => {
+    const result = filterRestaurants(
+      [
+        {
+          ...restaurants[0],
+          id: 'meat-store',
+          name: '영풍축산물판매장',
+          category: '기타요식업',
+          menus: [{ name: '삼겹살 100g', price: 3_000 }],
+        },
+      ],
+      {
+        userPosition: { latitude: 37, longitude: 127 },
+        category: '전체',
         budget: 10_000,
         maxDistanceMeters: 1_000,
       },

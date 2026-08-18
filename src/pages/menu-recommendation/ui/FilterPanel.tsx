@@ -62,7 +62,7 @@ export function FilterPanel({
 
       <fieldset>
         <legend>음식 종류</legend>
-        <div className="chip-group">
+        <div className="chip-group category-chips">
           {CATEGORY_FILTER_OPTIONS.map((option) => (
             <button
               type="button"

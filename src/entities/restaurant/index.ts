@@ -18,18 +18,22 @@ export {
 export {
   filterRestaurants,
   getAffordableMenus,
+  getRestaurantFilterCategory,
   isCafeRestaurant,
   isMealMenu,
+  isNonRestaurantBusiness,
   type FilterConditions,
   type RestaurantCandidate,
 } from './model/filters'
 export {
   ALL_CATEGORY_FILTER,
   RESTAURANT_CATEGORIES,
+  RESTAURANT_FILTER_CATEGORIES,
   type CategoryFilter,
   type Menu,
   type Restaurant,
   type RestaurantCategory,
+  type RestaurantFilterCategory,
 } from './model/restaurant'
 export {
   RESTAURANT_SOURCES,

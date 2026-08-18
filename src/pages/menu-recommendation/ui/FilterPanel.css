@@ -94,6 +94,10 @@ legend {
 }
 
 @media (max-width: 680px) {
+  .chip-group.category-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .chip {
     min-height: 41px;
     padding-inline: 5px;

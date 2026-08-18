@@ -23,6 +23,7 @@ const candidates: RestaurantCandidate[] = ['첫 번째', '두 번째', '세 번�
       longitude: 126.64,
       menus: [{ name: '백반', price: 9_000 }],
     },
+    category: '한식',
     distanceMeters: 100,
     affordableMenus: [{ name: '백반', price: 9_000 }],
   }),
