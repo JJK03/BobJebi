@@ -1,6 +1,13 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import {
+  deduplicateRestaurants,
+  normalizeRestaurantAddress,
+  normalizeRestaurantName,
+} from "./deduplicate-restaurants.mjs";
+
+export { normalizeRestaurantAddress, normalizeRestaurantName };
 
 const DEFAULT_OUTPUT_PATH = ".cache/restaurant-data-audit.json";
 const DEFAULT_MAX_SIDE_MENU_PRICE = 10_000;
@@ -96,19 +103,6 @@ const CATEGORY_RULES = [
 
 function normalizeText(value) {
   return String(value ?? "").normalize("NFKC").trim();
-}
-
-export function normalizeRestaurantName(value) {
-  return normalizeText(value)
-    .toLowerCase()
-    .replace(/\(주\)|㈜|주식회사/g, "")
-    .replace(/[^0-9a-z가-힣]/g, "");
-}
-
-export function normalizeRestaurantAddress(value) {
-  return normalizeText(value)
-    .toLowerCase()
-    .replace(/[^0-9a-z가-힣]/g, "");
 }
 
 function toRestaurantReference(restaurant) {
@@ -238,6 +232,7 @@ export function auditRestaurantDataset(
     const address = normalizeRestaurantAddress(restaurant.address);
     return name && address ? `${name}|${address}` : "";
   });
+  const deduplication = deduplicateRestaurants(restaurants);
   const suspectedSideMenus = [];
   const categoryReviewCandidates = [];
 
@@ -295,6 +290,15 @@ export function auditRestaurantDataset(
       duplicateKakaoPlaceRecords: duplicateKakaoRecordCount,
       duplicateNameAddressGroups: duplicateNameAddresses.length,
       duplicateNameAddressRecords: duplicateNameAddressRecordCount,
+      deduplicatedRestaurants: deduplication.restaurants.length,
+      deduplicationGroups: deduplication.groups.length,
+      removedDuplicateRecords: deduplication.removedCount,
+      deduplicationGroupsByReason: countBy(
+        deduplication.groups.flatMap((group) =>
+          group.reasons.map((reason) => ({ reason })),
+        ),
+        ({ reason }) => reason,
+      ),
       suspectedSideMenuEntries: suspectedSideMenus.length,
       restaurantsWithSuspectedSideMenus: new Set(
         suspectedSideMenus.map(({ id }) => id),
@@ -313,6 +317,7 @@ export function auditRestaurantDataset(
     details: {
       duplicateKakaoPlaces,
       duplicateNameAddresses,
+      deduplicationGroups: deduplication.groups,
       suspectedSideMenus,
       categoryReviewCandidates,
     },
@@ -353,6 +358,9 @@ function printDatasetSummary(dataset) {
   );
   console.log(
     `상호명+주소 중복: ${summary.duplicateNameAddressGroups.toLocaleString("ko-KR")}그룹 / ${summary.duplicateNameAddressRecords.toLocaleString("ko-KR")}건`,
+  );
+  console.log(
+    `실제 병합 예정: ${summary.deduplicationGroups.toLocaleString("ko-KR")}그룹 / ${summary.removedDuplicateRecords.toLocaleString("ko-KR")}건 제거 후 ${summary.deduplicatedRestaurants.toLocaleString("ko-KR")}곳`,
   );
   console.log(
     `저가 사이드 메뉴 의심: ${summary.suspectedSideMenuEntries.toLocaleString("ko-KR")}개 메뉴 / ${summary.restaurantsWithSuspectedSideMenus.toLocaleString("ko-KR")}곳`,

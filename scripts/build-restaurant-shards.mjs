@@ -1,6 +1,7 @@
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
+import { deduplicateRestaurants } from "./deduplicate-restaurants.mjs";
 
 const CELL_SIZE_DEGREES = 0.25;
 const LATITUDE_OFFSET = 0.2;
@@ -84,10 +85,17 @@ export async function buildRestaurantShards(source) {
   }
 
   assertSafeOutputDirectory(config.outputDirectory);
-  const restaurants = JSON.parse(await readFile(config.inputPath, "utf8"));
-  if (!Array.isArray(restaurants) || !restaurants.every(isValidRestaurantLocation)) {
+  const sourceRestaurants = JSON.parse(
+    await readFile(config.inputPath, "utf8"),
+  );
+  if (
+    !Array.isArray(sourceRestaurants) ||
+    !sourceRestaurants.every(isValidRestaurantLocation)
+  ) {
     throw new Error(`${source} 식당 데이터의 좌표 형식이 올바르지 않습니다.`);
   }
+  const deduplication = deduplicateRestaurants(sourceRestaurants);
+  const restaurants = deduplication.restaurants;
 
   const tiles = new Map();
   for (const restaurant of restaurants) {
@@ -129,6 +137,9 @@ export async function buildRestaurantShards(source) {
       version: 1,
       source,
       totalCount: restaurants.length,
+      sourceTotalCount: sourceRestaurants.length,
+      deduplicatedCount: deduplication.removedCount,
+      duplicateGroupCount: deduplication.groups.length,
       cellSizeDegrees: CELL_SIZE_DEGREES,
       latitudeOffset: LATITUDE_OFFSET,
       longitudeOffset: LONGITUDE_OFFSET,
@@ -149,6 +160,11 @@ export async function buildRestaurantShards(source) {
     console.log(
       `${source}: 식당 ${restaurants.length.toLocaleString("ko-KR")}곳을 ${tiles.size.toLocaleString("ko-KR")}개 위치 조각으로 생성했습니다.`,
     );
+    if (deduplication.removedCount > 0) {
+      console.log(
+        `${source}: 중복 ${deduplication.groups.length.toLocaleString("ko-KR")}그룹에서 ${deduplication.removedCount.toLocaleString("ko-KR")}건을 병합했습니다.`,
+      );
+    }
   } catch (error) {
     await rm(temporaryDirectory, { recursive: true, force: true });
     throw error;
