@@ -48,7 +48,7 @@ const SALAD_OR_BRUNCH_PATTERN = /샐러드|브런치|샌드위치|sandwich|산�
 const CHICKEN_OR_PIZZA_PATTERN =
   /치킨|통닭|닭강정|피자|햄버거|버거|프라이드치킨/i
 const QUICK_MEAL_PATTERN =
-  /분식|김밥|떡볶이|순대(?!국)|어묵|오뎅|라볶이|토스트|핫도그|닭꼬치|떡꼬치|만두|브리또|전복죽|야채죽|소고기죽/i
+  /분식|김밥|떡볶이|순대(?!국)|어묵|오뎅|라볶이|토스트|핫도그|닭꼬치|떡꼬치|만두|브리또|부리또|전복죽|야채죽|소고기죽/i
 const BAKERY_OR_DESSERT_PATTERN =
   /베이커리|베이크|베이킹|제과|제빵|과자점|과자|빵집|빵|브레드|bread|베이글|bagel|도넛|도너츠|도너트|bakery|크루아상|크로와상|croissant|꽈배기|찐빵|호떡|붕어빵|고로케|마카롱|케이크|케익|cake|와플|크로플|아이스크림|빙수|젤라또|디저트|쿠키|cookie|휘낭시에|스콘|타르트|tart|카스테라|카스텔라|호두과자|호도|푸딩|츄러스|브라우니|brownie|파이|pie|머핀|muffin|만주|월병|다쿠와즈|모찌|인절미|백설기|절편|개떡|약식|강정|오란다|정과|한과|팥죽|호박죽|떡방|떡집|떡(?!볶이|갈비|만두)/i
 const BUFFET_PATTERN = /뷔페|부페|buffet/i
@@ -64,6 +64,12 @@ const MEAT_OR_GRILL_PATTERN =
   /곱창|막창|대창|고깃집|고기집|숯불|직화|삼겹|갈비|불고기|육회|닭갈비|오리|바비큐|바베큐|스테이크|제육|두루치기|돼지껍데기/i
 const PUB_OR_SNACK_PATTERN =
   /포차|호프|주점|펍|pub|술집|먹태|노가리|짝태|이자카야|오뎅바|막걸리|칵테일|위스키|whisk(?:y|ey)|보드카|vodka|양주|beer|비어|스타우트|에일|\bipa\b|martini|tequila|안주|빈대떡|모듬전|바(?:\s|$)/i
+const BAKERY_OR_DESSERT_BUSINESS_PATTERN =
+  /베이커리|베이크|베이킹|제과|제빵|과자점|빵집|브레드|베이글|도넛|도너츠|도너트|bakery|파리바게뜨|파리바게트|뚜레쥬르|설빙|떡방|떡집/i
+const ASIAN_FOOD_BUSINESS_PATTERN =
+  /쌀국수|마라|샤브|월남쌈|타코|케밥|팟타이|나시고랭|인도커리|인디아|사이공|똠얌|반미/i
+const PUB_OR_SNACK_BUSINESS_PATTERN =
+  /포차|호프|주점|펍|pub|술집|맥주집|비어|이자카야|오뎅바|주막/i
 const NON_RESTAURANT_BUSINESS_PATTERN =
   /축산물|정육점|정육마트|반찬가게|반찬점|식품(?:판매장)?|김치(?:가게|판매|$)|먹을거리|계란$/i
 const RETAIL_PRODUCT_PATTERN =
@@ -76,8 +82,47 @@ const CURATED_FILTER_CATEGORY_BY_KAKAO_PLACE_ID: Readonly<
   '10199351': '아시아음식', // 까르본: 우즈베키스탄 음식 전문점
 }
 
+type CategoryPatternRule = readonly [
+  RestaurantFilterCategory,
+  RegExp,
+]
+
+const STRONG_BUSINESS_CATEGORY_RULES: readonly CategoryPatternRule[] = [
+  ['뷔페', BUFFET_PATTERN],
+  ['베이커리·디저트', BAKERY_OR_DESSERT_BUSINESS_PATTERN],
+  ['아시아음식', ASIAN_FOOD_BUSINESS_PATTERN],
+  ['일식', JAPANESE_FOOD_PATTERN],
+  ['주점·안주', PUB_OR_SNACK_BUSINESS_PATTERN],
+  ['해산물·회', SEAFOOD_PATTERN],
+  ['샐러드·브런치', SALAD_OR_BRUNCH_PATTERN],
+  ['치킨·피자', CHICKEN_OR_PIZZA_PATTERN],
+  ['분식·간편식', QUICK_MEAL_PATTERN],
+  ['고기·구이', MEAT_OR_GRILL_PATTERN],
+]
+
+const MENU_CATEGORY_RULES: readonly CategoryPatternRule[] = [
+  ['아시아음식', ASIAN_FOOD_PATTERN],
+  ['일식', JAPANESE_FOOD_PATTERN],
+  ['샐러드·브런치', SALAD_OR_BRUNCH_PATTERN],
+  ['치킨·피자', CHICKEN_OR_PIZZA_PATTERN],
+  ['분식·간편식', QUICK_MEAL_PATTERN],
+  ['베이커리·디저트', BAKERY_OR_DESSERT_PATTERN],
+  ['뷔페', BUFFET_PATTERN],
+  ['뷔페', BUFFET_OR_EVENT_PATTERN],
+  ['주점·안주', PUB_OR_SNACK_PATTERN],
+  ['해산물·회', SEAFOOD_PATTERN],
+  ['고기·구이', MEAT_OR_GRILL_PATTERN],
+]
+
 function normalizeMenuName(name: string): string {
   return name.normalize('NFKC').replace(/\s+/g, ' ').trim()
+}
+
+function getMatchingCategory(
+  text: string,
+  rules: readonly CategoryPatternRule[],
+): RestaurantFilterCategory | null {
+  return rules.find(([, pattern]) => pattern.test(text))?.[0] ?? null
 }
 
 export function isMealMenu(menu: Menu): boolean {
@@ -158,45 +203,19 @@ export function getRestaurantFilterCategory(
     return restaurant.category
   }
 
-  const classificationText = normalizeMenuName(
-    `${restaurant.name} ${restaurant.menus.map((menu) => menu.name).join(' ')}`,
+  const restaurantName = normalizeMenuName(restaurant.name)
+  const businessCategory = getMatchingCategory(
+    restaurantName,
+    STRONG_BUSINESS_CATEGORY_RULES,
   )
-
-  if (SALAD_OR_BRUNCH_PATTERN.test(classificationText)) {
-    return '샐러드·브런치'
-  }
-  if (CHICKEN_OR_PIZZA_PATTERN.test(classificationText)) {
-    return '치킨·피자'
-  }
-  if (QUICK_MEAL_PATTERN.test(classificationText)) {
-    return '분식·간편식'
-  }
-  if (BAKERY_OR_DESSERT_PATTERN.test(classificationText)) {
-    return '베이커리·디저트'
-  }
-  if (
-    BUFFET_PATTERN.test(classificationText) ||
-    BUFFET_OR_EVENT_PATTERN.test(classificationText)
-  ) {
-    return '뷔페'
-  }
-  if (ASIAN_FOOD_PATTERN.test(classificationText)) {
-    return '아시아음식'
-  }
-  if (JAPANESE_FOOD_PATTERN.test(classificationText)) {
-    return '일식'
-  }
-  if (PUB_OR_SNACK_PATTERN.test(classificationText)) {
-    return '주점·안주'
-  }
-  if (SEAFOOD_PATTERN.test(classificationText)) {
-    return '해산물·회'
-  }
-  if (MEAT_OR_GRILL_PATTERN.test(classificationText)) {
-    return '고기·구이'
+  if (businessCategory) {
+    return businessCategory
   }
 
-  return null
+  const menuText = normalizeMenuName(
+    restaurant.menus.map((menu) => menu.name).join(' '),
+  )
+  return getMatchingCategory(menuText, MENU_CATEGORY_RULES)
 }
 
 export function getAffordableMenus(
