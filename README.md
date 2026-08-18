@@ -1,82 +1,50 @@
-# 오늘 뭐 먹지?
+# 밥제비
 
-현재 위치, 음식 종류, 예산, 이동 방식과 예상 시간을 바탕으로 주변 식당 한 곳을 제비뽑기로 추천하는 React 정적 웹 앱입니다. `착한가격업소`와 `인천 스마트음식관광`을 탭으로 전환할 수 있습니다.
+현재 위치나 원하는 지역 주변에서 음식 종류, 한 사람 예산, 이동 조건에 맞는 식당을 추린 뒤 제비뽑기로 한 곳을 추천합니다.
 
-## 배포
-
-Vercel에 배포되어 있으며 아래 주소에서 바로 사용할 수 있습니다.
+## 바로 사용하기
 
 **[bobjebi.vercel.app](https://bobjebi.vercel.app/)**
 
-## 기술 구성
+설치 없이 모바일과 PC 브라우저에서 이용할 수 있습니다.
 
-- React + TypeScript + Vite
-- Vercel 정적 배포
-- Vercel Web Analytics + Speed Insights
-- 브라우저 Geolocation API
-- 카카오 지도 JavaScript API 장소·주소 검색
-- Haversine 직선거리 계산
-- 착한가격업소와 인천 스마트음식관광 정적 JSON 데이터
-- Vitest 단위 테스트
-- 백엔드와 데이터베이스 없음
+1. `착한가격업소` 또는 `인천 스마트음식관광` 탭을 고릅니다.
+2. 현재 위치를 허용하거나 원하는 위치를 검색합니다.
+3. 음식 종류, 한 사람 예산, 이동 방식과 예상 시간을 선택합니다.
+4. 제비를 뽑고 추천 식당과 메뉴를 확인합니다.
+5. 결과 카드에서 카카오맵으로 식당 위치를 엽니다.
 
-카카오 REST API 키는 웹 앱에서 사용하지 않으며 저장소에도 보관하지 않습니다. 주소 좌표 변환이 끝난 정적 데이터만 사용합니다. 원하는 위치 검색에는 브라우저용 카카오 JavaScript 키를 사용하며, 카카오 개발자 콘솔의 JavaScript SDK 허용 도메인으로 사용 범위를 제한합니다.
+## 주요 기능
 
-## 카카오 위치 검색 설정
+- 현재 위치와 검색한 위치를 기준으로 주변 식당 추천
+- 음식 종류, 1인 예산, 도보·자차, 예상 시간 필터
+- 착한가격업소와 인천 스마트음식관광 데이터 전환
+- 한 사이클 안에서 같은 식당이 반복되지 않는 제비뽑기
+- 조건에 맞는 식사 메뉴와 예상 거리·시간 표시
+- 조건에 맞는 후보가 없을 때 빠른 조건 완화
+- 카카오맵 장소 또는 식당 검색 연결
 
-`.env.example`을 `.env.local`로 복사하고 카카오 JavaScript 키를 입력합니다. 이미 `.env.local`이 있다면 아래 항목만 추가합니다.
+## 데이터와 거리 안내
 
-```env
-VITE_KAKAO_JAVASCRIPT_KEY=발급받은_JavaScript_키
-```
+- 착한가격업소: 행정안전부 공공데이터
+- 인천 스마트음식관광: 인천관광공사 스마트음식관광 DB
+- 이동 시간은 실제 길찾기가 아니라 두 좌표 사이의 직선거리와 평균 속도로 계산한 예상값입니다.
+- 메뉴와 가격은 원천 데이터의 갱신 시점에 따라 실제 매장 정보와 다를 수 있습니다. 방문 전 매장 정보를 다시 확인해 주세요.
 
-카카오 개발자 콘솔의 `앱 → 플랫폼 키 → JavaScript 키 → JavaScript SDK 도메인`에 다음 주소를 등록합니다.
+## 로컬에서 실행하기
 
-```text
-http://localhost:5173
-https://bobjebi.vercel.app
-```
-
-Vercel 프로젝트의 `Settings → Environment Variables`에도 `VITE_KAKAO_JAVASCRIPT_KEY`를 추가하고 Production에 적용한 뒤 다시 배포합니다. 이 키는 브라우저에서 사용하는 공개 키이므로 REST API 키를 대신 입력하면 안 됩니다.
-
-## VS Code + CMD에서 실행
+Node.js가 설치된 VS Code의 CMD 터미널에서 실행합니다.
 
 ```cmd
 cd /d C:\workspace\Menu_recs
 npm install
+copy .env.example .env.local
 npm run dev
 ```
 
-브라우저에서 `http://localhost:5173`을 엽니다. 개발 서버를 종료할 때는 CMD에서 `Ctrl+C`를 누릅니다.
+`.env.local`의 `VITE_KAKAO_JAVASCRIPT_KEY`에 카카오 JavaScript 키를 입력하면 위치 검색을 사용할 수 있습니다. 실제 인증키가 든 `.env.local`은 Git에 올리지 않습니다.
 
-## 검증 명령
-
-```cmd
-npm test
-npm run lint
-npm run build
-```
-
-## 착한가격업소 API로 데이터 갱신
-
-앱은 공공데이터 API를 브라우저에서 직접 호출하지 않습니다. 배포 전에 API 데이터를 받아 `public/data/restaurants.json`을 갱신하므로 인증키가 사용자에게 노출되지 않고, API 장애가 발생해도 배포된 앱은 계속 동작합니다.
-
-공공데이터포털의 해당 API 상세 화면에서 최신 데이터셋의 요청주소를 확인한 뒤 `.env.local`에 다음 두 항목을 추가합니다. 요청주소에는 `serviceKey` 등의 쿼리 파라미터를 붙이지 않아도 됩니다. 인증키는 가능하면 `일반 인증키(Decoding)` 값을 사용합니다.
-
-```env
-GOOD_PRICE_API_URL=https://api.odcloud.kr/api/3045247/v1/uddi:데이터셋_ID
-DATA_GO_KR_API_KEY=발급받은_공공데이터_인증키
-```
-
-다음 명령으로 데이터를 갱신합니다.
-
-```cmd
-npm run data:sync-good-price
-```
-
-동기화 과정에서는 기존 식당의 좌표와 카카오 장소 ID를 보존합니다. 새 식당은 `.env.local`의 `KAKAO_REST_API_KEY`로 주소를 좌표로 변환하며, 좌표를 찾지 못한 항목은 앱 데이터에서 제외하고 결과 건수를 출력합니다. API 응답이나 설정이 잘못되어 결과가 기존 데이터의 절반보다 적으면 원본 JSON을 덮어쓰지 않습니다.
-
-갱신 후에는 아래 명령으로 확인합니다.
+검증 명령은 다음과 같습니다.
 
 ```cmd
 npm test
@@ -84,78 +52,16 @@ npm run lint
 npm run build
 ```
 
-`DATA_GO_KR_API_KEY`와 `GOOD_PRICE_API_URL`에는 `VITE_` 접두사를 붙이지 않습니다. `VITE_` 환경변수는 브라우저 번들에 포함될 수 있습니다.
+## 개발 문서
 
-## 인천 스마트음식관광 데이터 갱신
+프로젝트 구조, 핵심 로직, 환경변수, 데이터 갱신, 배포와 장애 대응은 **[밥제비 개발 문서](https://app.notion.com/p/3c09b106d5f281c59cbedc15f8eab751?source=copy_link)**에서 관리합니다.
 
-인천관광공사 스마트음식관광 API의 전용 토큰을 `.env.local`에 입력합니다. 이 토큰도 브라우저에서 사용하지 않으므로 `VITE_` 접두사를 붙이지 않습니다.
+## 기술 구성
 
-```env
-INCHEON_FOOD_API_TOKEN=발급받은_전용_토큰
-```
-
-한국어 매장 기본정보와 메뉴정보를 받아 식당 ID로 결합한 뒤 `public/data/incheon-restaurants.json`을 갱신합니다.
-
-```cmd
-npm run data:sync-incheon-food
-```
-
-제공 API가 `DB_ERROR`를 반환할 때는 공공데이터포털에서 아래 두 공식 파일을 내려받아 파일 경로를 지정할 수 있습니다.
-
-- `인천관광공사_맛집_식당기본정보(다국어)` ZIP
-- `인천관광공사_맛집_식당메뉴정보(다국어)` XLSX
-
-```cmd
-npm run data:import-incheon-food -- --restaurants-zip="C:\다운로드\식당기본정보.zip" --menus-xlsx="C:\다운로드\식당메뉴정보.xlsx"
-```
-
-좌표와 가격이 있는 식당만 앱 데이터에 포함하며, 공기밥·사리·추가 메뉴·주류처럼 식사 예산 판단에 적합하지 않은 항목은 제외합니다.
-
-인천 데이터에서 카카오 식당·카페 상세 화면을 정확히 열도록 장소 ID를 보강하려면 다음 명령을 실행합니다. 식당명이 같고 150m 이내이거나, 음식점·카페이면서 주소가 같은 경우만 연결합니다. 매칭되지 않은 식당은 카카오맵에서 식당명과 지역명으로 검색합니다.
-
-```cmd
-npm run data:enrich-kakao-incheon
-```
-
-인천 API 또는 공식 파일로 데이터를 다시 갱신해도 기존 카카오 장소 ID와 상세 URL은 보존됩니다.
-
-앱용 식당 JSON에서 검수용 `geocoding` 필드를 제거하고 파일을 압축하려면 다음 명령을 실행합니다. 원본 전처리 파일은 별도로 보존하고 `public/data/restaurants.json`에 복사한 뒤 실행합니다.
-
-```cmd
-npm run data:optimize
-```
-
-카카오 장소 ID와 업체 상세 URL을 보강하려면 `.env.example`을 `.env.local`로 복사하고 REST API 키를 입력한 뒤 실행합니다. `.env.local`은 Git에 포함되지 않습니다.
-
-```cmd
-copy .env.example .env.local
-npm run data:enrich-kakao
-```
-
-식당명 정규화 결과가 완전히 같고 저장 좌표에서 500m 안에 있는 장소만 연결합니다. 결과는 50건마다 저장되며, 중단 후 같은 명령을 실행하면 이어서 처리합니다. 소량만 시험하려면 다음처럼 실행할 수 있습니다.
-
-```cmd
-npm run data:enrich-kakao -- --limit=10
-```
-
-프로덕션 빌드 결과는 `dist` 폴더에 생성됩니다. 로컬에서 빌드 결과를 확인하려면 다음 명령을 실행합니다.
-
-```cmd
-npm run preview
-```
-
-## 주요 구조
-
-```text
-public/data/restaurants.json           착한가격업소 데이터
-public/data/incheon-restaurants.json  인천 스마트음식관광 데이터
-src/app/                     앱 진입점·전역 스타일·페이지 조립
-src/pages/menu-recommendation/ 추천 페이지 UI와 화면 전용 상태
-src/entities/restaurant/     식당 모델·필터·데이터 로더
-src/shared/api/kakao/        카카오 지도 외부 연동
-src/shared/lib/              좌표·거리·무작위 추첨 공용 로직
-```
-
-## 거리 기준
-
-이동 시간은 실제 경로 탐색 결과가 아니라 두 좌표 사이의 직선거리와 평균 속도(도보 시속 4km, 자차 시속 24km)로 계산한 예상값입니다. 주변 추천의 범위를 벗어나지 않도록 넓게 보기에도 도보 2km, 자차 20km의 최대 검색 범위를 적용합니다. 식당은 선택한 예산 이하 메뉴가 하나 이상 있을 때만 추천 후보에 포함됩니다.
+- React 19 + TypeScript + Vite
+- 가벼운 Feature-Sliced Design 구조
+- 위치별 정적 JSON shard와 브라우저 메모리 캐시
+- 카카오 지도 JavaScript API
+- Vercel 정적 배포, Analytics, Speed Insights
+- Vitest + Testing Library
+- 런타임 백엔드와 데이터베이스 없음
