@@ -242,6 +242,37 @@ describe('getRestaurantFilterCategory', () => {
   })
 
   it.each([
+    ['추억의포장마차', '계란말이', '주점·안주'],
+    ['파리바게뜨 송도센트럴파크점', '소금빵', '베이커리·디저트'],
+    ['흥성양꼬치 송도점', '숙성 생양꼬치', '아시아음식'],
+  ])(
+    '원본이 중식이어도 %s의 강한 업종 신호를 우선한다',
+    (name, menuName, expected) => {
+      expect(
+        getRestaurantFilterCategory({
+          ...restaurants[0],
+          id: `source-category-override-${name}`,
+          name,
+          category: '중식',
+          menus: [{ name: menuName, price: 10_000 }],
+        }),
+      ).toBe(expected)
+    },
+  )
+
+  it('강한 반대 신호가 없는 정상 중식은 원본 분류를 유지한다', () => {
+    expect(
+      getRestaurantFilterCategory({
+        ...restaurants[0],
+        id: 'source-category-chinese',
+        name: '레인보우차이홍',
+        category: '중식',
+        menus: [{ name: '유니자장면', price: 8_000 }],
+      }),
+    ).toBe('중식')
+  })
+
+  it.each([
     ['김밥마을', '참치김밥', '분식·간편식'],
     ['박은선닭꼬치', '순살닭꼬치', '분식·간편식'],
     ['만두의정석', '고기만두', '분식·간편식'],

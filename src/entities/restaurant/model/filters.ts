@@ -67,9 +67,9 @@ const PUB_OR_SNACK_PATTERN =
 const BAKERY_OR_DESSERT_BUSINESS_PATTERN =
   /베이커리|베이크|베이킹|제과|제빵|과자점|빵집|브레드|베이글|도넛|도너츠|도너트|bakery|파리바게뜨|파리바게트|뚜레쥬르|설빙|떡방|떡집/i
 const ASIAN_FOOD_BUSINESS_PATTERN =
-  /쌀국수|마라|샤브|월남쌈|타코|케밥|팟타이|나시고랭|인도커리|인디아|사이공|똠얌|반미/i
+  /쌀국수|마라|훠궈|양꼬치|샤브|월남쌈|타코|케밥|팟타이|나시고랭|인도커리|인디아|사이공|똠얌|반미/i
 const PUB_OR_SNACK_BUSINESS_PATTERN =
-  /포차|호프|주점|펍|pub|술집|맥주집|비어|이자카야|오뎅바|주막/i
+  /포장마차|포차|호프|주점|펍|pub|술집|맥주집|비어|이자카야|오뎅바|주막/i
 const NON_RESTAURANT_BUSINESS_PATTERN =
   /축산물|정육점|정육마트|반찬가게|반찬점|식품(?:판매장)?|김치(?:가게|판매|$)|먹을거리|계란$/i
 const RETAIL_PRODUCT_PATTERN =
@@ -200,10 +200,6 @@ export function getRestaurantFilterCategory(
     return curatedCategory
   }
 
-  if (restaurant.category !== '기타요식업') {
-    return restaurant.category
-  }
-
   const restaurantName = normalizeMenuName(restaurant.name)
   const businessCategory = getMatchingCategory(
     restaurantName,
@@ -211,6 +207,10 @@ export function getRestaurantFilterCategory(
   )
   if (businessCategory) {
     return businessCategory
+  }
+
+  if (restaurant.category !== '기타요식업') {
+    return restaurant.category
   }
 
   const menuText = normalizeMenuName(

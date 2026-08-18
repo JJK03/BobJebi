@@ -1,10 +1,14 @@
-import type { RestaurantFilterCategory } from './restaurant'
+import type {
+  RestaurantCategory,
+  RestaurantFilterCategory,
+} from './restaurant'
 
 export interface CategoryRegressionFixture {
   source: 'good-price' | 'incheon-smart-food'
   id: string
   kakaoPlaceId: string
   name: string
+  category?: RestaurantCategory
   menuNames: string[]
   expectedCategory: RestaurantFilterCategory
 }
@@ -209,5 +213,32 @@ export const CATEGORY_REGRESSION_FIXTURES: readonly CategoryRegressionFixture[] 
     name: '황소고집돌곱창',
     menuNames: ['볶음밥', '소곱창구이', '소대창구이', '소막창구이'],
     expectedCategory: '고기·구이',
+  },
+  {
+    source: 'incheon-smart-food',
+    id: 'incheon-161364',
+    kakaoPlaceId: '16630201',
+    name: '추억의포장마차',
+    category: '중식',
+    menuNames: ['잔치국수', '추억의도시락', '계란찜', '번데기탕'],
+    expectedCategory: '주점·안주',
+  },
+  {
+    source: 'incheon-smart-food',
+    id: 'incheon-172536',
+    kakaoPlaceId: '24481763',
+    name: '파리바게뜨 송도센트럴파크점',
+    category: '중식',
+    menuNames: ['아메리카노', '카페라떼', '카푸치노'],
+    expectedCategory: '베이커리·디저트',
+  },
+  {
+    source: 'incheon-smart-food',
+    id: 'incheon-166860',
+    kakaoPlaceId: '1422120170',
+    name: '흥성양꼬치 송도점',
+    category: '중식',
+    menuNames: ['마라탕', '숙성/생 양꼬치', '양갈비살'],
+    expectedCategory: '아시아음식',
   },
 ]

@@ -6,12 +6,12 @@ import type { Restaurant } from './restaurant'
 describe('실제 데이터 카테고리 회귀 표본', () => {
   it.each(CATEGORY_REGRESSION_FIXTURES)(
     '$source/$id $name → $expectedCategory',
-    ({ id, kakaoPlaceId, name, menuNames, expectedCategory }) => {
+    ({ id, kakaoPlaceId, name, category, menuNames, expectedCategory }) => {
       const restaurant: Restaurant = {
         id,
         kakaoPlaceId,
         name,
-        category: '기타요식업',
+        category: category ?? '기타요식업',
         province: '회귀 테스트',
         district: '회귀 테스트',
         address: '회귀 테스트',
