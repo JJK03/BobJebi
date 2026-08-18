@@ -15,6 +15,7 @@ dist-ssr
 .env.*
 !.env.example
 .cache/
+/public/data/shards/
 
 # Local source and planning files
 GoodPrice_260630.csv

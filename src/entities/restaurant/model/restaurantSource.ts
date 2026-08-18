@@ -8,7 +8,7 @@ export const RESTAURANT_SOURCES = {
     loadingLabel: "전국 착한가격업소 데이터를 불러오는 중입니다…",
     footerLabel:
       "행정안전부 착한가격업소 데이터를 활용한 위치 기반 추천 서비스",
-    dataPath: "/data/restaurants.json",
+    manifestPath: "/data/shards/good-price/manifest.json",
   },
   "incheon-smart-food": {
     tabLabel: "인천 스마트음식관광",
@@ -19,7 +19,7 @@ export const RESTAURANT_SOURCES = {
     loadingLabel: "인천 스마트음식관광 데이터를 불러오는 중입니다…",
     footerLabel:
       "인천관광공사 스마트음식관광 DB를 활용한 위치 기반 추천 서비스",
-    dataPath: "/data/incheon-restaurants.json",
+    manifestPath: "/data/shards/incheon-smart-food/manifest.json",
   },
 } as const;
 

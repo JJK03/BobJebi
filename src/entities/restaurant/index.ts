@@ -1,4 +1,10 @@
-export { loadRestaurants } from './api/loadRestaurants'
+export {
+  clearRestaurantDataCache,
+  getRequiredRestaurantTileKeys,
+  loadNearbyRestaurants,
+  loadRestaurantManifest,
+  type RestaurantManifest,
+} from './api/loadRestaurants'
 export {
   BUDGET_OPTIONS,
   CATEGORY_FILTER_OPTIONS,

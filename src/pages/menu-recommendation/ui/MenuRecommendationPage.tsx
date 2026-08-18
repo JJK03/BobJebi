@@ -31,11 +31,6 @@ export function MenuRecommendationPage() {
     useState<RestaurantSource>("good-price");
   const sourceContent = RESTAURANT_SOURCES[activeSource];
   const {
-    restaurants,
-    status: dataStatus,
-    error: dataError,
-  } = useRestaurants(activeSource);
-  const {
     position,
     status: locationStatus,
     requestLocation,
@@ -46,13 +41,24 @@ export function MenuRecommendationPage() {
   const [manualLocation, setManualLocation] = useState<LocationSearchResult>();
   const resultRef = useRef<HTMLDivElement>(null);
   const activePosition = manualLocation?.coordinates ?? position;
+  const maxDistanceMeters =
+    travelMode !== null && travelTimeLimit !== null
+      ? getTravelDistanceLimitMeters(travelMode, travelTimeLimit)
+      : undefined;
+  const {
+    restaurants,
+    totalCount,
+    status: dataStatus,
+    error: dataError,
+  } = useRestaurants(activeSource, activePosition, maxDistanceMeters);
   const candidates = useMemo(() => {
     if (
       !activePosition ||
       category === null ||
       budget === null ||
       travelMode === null ||
-      travelTimeLimit === null
+      travelTimeLimit === null ||
+      maxDistanceMeters === undefined
     ) {
       return [];
     }
@@ -61,10 +67,7 @@ export function MenuRecommendationPage() {
       userPosition: activePosition,
       category,
       budget,
-      maxDistanceMeters: getTravelDistanceLimitMeters(
-        travelMode,
-        travelTimeLimit,
-      ),
+      maxDistanceMeters,
     });
   }, [
     restaurants,
@@ -73,6 +76,7 @@ export function MenuRecommendationPage() {
     budget,
     travelMode,
     travelTimeLimit,
+    maxDistanceMeters,
   ]);
   const { selected, isDrawing, drawRestaurant, clearResult } =
     useRestaurantDraw(candidates);
@@ -211,8 +215,8 @@ export function MenuRecommendationPage() {
             </div>
             <div className="hero-ticket-number">
               <strong>
-                {dataStatus === "success"
-                  ? restaurants.length.toLocaleString("ko-KR")
+                {totalCount > 0
+                  ? totalCount.toLocaleString("ko-KR")
                   : "—"}
               </strong>
               <span>등록 식당</span>

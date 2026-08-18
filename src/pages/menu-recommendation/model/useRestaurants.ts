@@ -1,23 +1,32 @@
 import { useEffect, useState } from 'react'
 import {
-  loadRestaurants,
+  loadNearbyRestaurants,
+  loadRestaurantManifest,
   type Restaurant,
   type RestaurantSource,
 } from '../../../entities/restaurant'
+import type { Coordinates } from '../../../shared/lib/geo'
 
-type LoadingStatus = 'loading' | 'success' | 'error'
+type LoadingStatus = 'loading' | 'waiting' | 'success' | 'error'
 
 interface RestaurantState {
-  source: RestaurantSource
+  requestKey: string
   restaurants: Restaurant[]
+  totalCount: number
   status: LoadingStatus
   error: string
 }
 
-export function useRestaurants(source: RestaurantSource) {
+export function useRestaurants(
+  source: RestaurantSource,
+  position?: Coordinates,
+  maxDistanceMeters?: number,
+) {
+  const requestKey = `${source}:${position?.latitude ?? ''}:${position?.longitude ?? ''}:${maxDistanceMeters ?? ''}`
   const [state, setState] = useState<RestaurantState>({
-    source,
+    requestKey,
     restaurants: [],
+    totalCount: 0,
     status: 'loading',
     error: '',
   })
@@ -25,11 +34,29 @@ export function useRestaurants(source: RestaurantSource) {
   useEffect(() => {
     const controller = new AbortController()
 
-    loadRestaurants(source, controller.signal)
-      .then((data) => {
+    loadRestaurantManifest(source, controller.signal)
+      .then(async (manifest) => {
+        if (!position || maxDistanceMeters === undefined) {
+          setState({
+            requestKey,
+            restaurants: [],
+            totalCount: manifest.totalCount,
+            status: 'waiting',
+            error: '',
+          })
+          return
+        }
+
+        const restaurants = await loadNearbyRestaurants(
+          manifest,
+          position,
+          maxDistanceMeters,
+          controller.signal,
+        )
         setState({
-          source,
-          restaurants: data,
+          requestKey,
+          restaurants,
+          totalCount: manifest.totalCount,
           status: 'success',
           error: '',
         })
@@ -40,8 +67,9 @@ export function useRestaurants(source: RestaurantSource) {
         }
 
         setState({
-          source,
+          requestKey,
           restaurants: [],
+          totalCount: 0,
           status: 'error',
           error:
             reason instanceof Error
@@ -51,14 +79,29 @@ export function useRestaurants(source: RestaurantSource) {
       })
 
     return () => controller.abort()
-  }, [source])
+  }, [
+    source,
+    position?.latitude,
+    position?.longitude,
+    maxDistanceMeters,
+    requestKey,
+    position,
+  ])
 
-  if (state.source !== source) {
-    return { restaurants: [], status: 'loading' as const, error: '' }
+  if (state.requestKey !== requestKey) {
+    return {
+      restaurants: [],
+      totalCount: state.requestKey.startsWith(`${source}:`)
+        ? state.totalCount
+        : 0,
+      status: 'loading' as const,
+      error: '',
+    }
   }
 
   return {
     restaurants: state.restaurants,
+    totalCount: state.totalCount,
     status: state.status,
     error: state.error,
   }
