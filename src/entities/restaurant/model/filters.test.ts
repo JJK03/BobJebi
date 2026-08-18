@@ -3,6 +3,7 @@ import type { Restaurant } from './restaurant'
 import {
   filterRestaurants,
   getAffordableMenus,
+  isCafeRestaurant,
   isMealMenu,
 } from './filters'
 
@@ -86,6 +87,52 @@ describe('isMealMenu', () => {
   })
 })
 
+describe('isCafeRestaurant', () => {
+  it('상호와 메뉴가 음료 중심인 순수 카페를 판별한다', () => {
+    const cafe: Restaurant = {
+      ...restaurants[0],
+      id: 'coffee-shop',
+      name: '송도 로스터리 카페',
+      category: '중식',
+      menus: [
+        { name: '아메리카노', price: 3_000 },
+        { name: '카페라떼', price: 4_000 },
+        { name: '캐모마일', price: 4_000 },
+      ],
+    }
+
+    expect(isCafeRestaurant(cafe)).toBe(true)
+  })
+
+  it('식사 메뉴가 있는 카페는 식당 후보로 유지한다', () => {
+    const brunchCafe: Restaurant = {
+      ...restaurants[0],
+      id: 'brunch-cafe',
+      name: '동네 카페',
+      menus: [
+        { name: '아메리카노', price: 3_000 },
+        { name: '수제 샌드위치', price: 8_000 },
+      ],
+    }
+
+    expect(isCafeRestaurant(brunchCafe)).toBe(false)
+  })
+
+  it('베이커리와 제과점은 카페로 분류하지 않는다', () => {
+    const bakery: Restaurant = {
+      ...restaurants[0],
+      id: 'bakery-cafe',
+      name: '쌀빵카페나무',
+      menus: [
+        { name: '아메리카노', price: 3_000 },
+        { name: '소금빵', price: 3_500 },
+      ],
+    }
+
+    expect(isCafeRestaurant(bakery)).toBe(false)
+  })
+})
+
 describe('filterRestaurants', () => {
   it('거리, 카테고리, 예산 조건을 모두 적용한다', () => {
     const result = filterRestaurants(restaurants, {
@@ -128,6 +175,31 @@ describe('filterRestaurants', () => {
       {
         userPosition: { latitude: 37, longitude: 127 },
         category: '한식',
+        budget: 10_000,
+        maxDistanceMeters: 1_000,
+      },
+    )
+
+    expect(result).toEqual([])
+  })
+
+  it('카테고리가 잘못 지정된 순수 카페도 식당 후보에서 제외한다', () => {
+    const result = filterRestaurants(
+      [
+        {
+          ...restaurants[0],
+          id: 'misclassified-cafe',
+          name: '커피하우스',
+          category: '중식',
+          menus: [
+            { name: '아메리카노', price: 2_500 },
+            { name: '카페라떼', price: 3_500 },
+          ],
+        },
+      ],
+      {
+        userPosition: { latitude: 37, longitude: 127 },
+        category: '중식',
         budget: 10_000,
         maxDistanceMeters: 1_000,
       },

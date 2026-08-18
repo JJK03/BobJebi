@@ -18,6 +18,7 @@ export {
 export {
   filterRestaurants,
   getAffordableMenus,
+  isCafeRestaurant,
   isMealMenu,
   type FilterConditions,
   type RestaurantCandidate,
