@@ -10,6 +10,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "data:build-shards": "node scripts/build-restaurant-shards.mjs",
+    "data:audit": "node scripts/audit-restaurant-data.mjs",
     "data:sync-good-price": "node --env-file-if-exists=.env.local scripts/sync-good-price-api.mjs && node scripts/build-restaurant-shards.mjs --source=good-price",
     "data:sync-incheon-food": "node --env-file-if-exists=.env.local scripts/sync-incheon-food-api.mjs && node scripts/build-restaurant-shards.mjs --source=incheon-smart-food",
     "data:import-incheon-food": "node scripts/import-incheon-files.mjs && node scripts/build-restaurant-shards.mjs --source=incheon-smart-food",
